@@ -89,7 +89,7 @@ class CellML( object ):
             math_apply = '{{{0}}}math/{{{0}}}apply'.format( MATHML_NAMESPACE ),
         )
 
-        print self.tag
+        # print self.tag
 
         self.components = {}
         self.variable_attributes = ( 'initial_value', 'public_interface', 'private_interface', 'units' )
@@ -172,6 +172,21 @@ class CellML( object ):
                     # print top_level_component_ref.get( 'component' )
                     self.containment_hierarchies[ top_level_component_ref.get( 'component' ) ] = \
                         self._get_component_ref_dict( top_level_component_ref )
+        
+        # <group>に含まれないcomponentをトップレベルに追加
+        for component_name in self.components:
+            if self.exists_in_group( component_name ) == False:
+                self.containment_hierarchies[ component_name ] = {}
+            
+    def exists_in_group( self, component_name ):
+        
+        for group_node in self.root_node.iterfind( self.tag[ 'group' ] ):
+            if group_node.find( self.tag[ 'relationship_ref' ] ).get( 'relationship' ) == 'containment':
+                for component_ref_node in group_node.iterfind( self.tag[ 'component_ref' ] ):
+                     if component_name == component_ref_node.get( 'component' ):
+                         return True
+        return False
+
 
     ##-------------------------------------------------------------------------------------------------
     def _get_connections( self ):
