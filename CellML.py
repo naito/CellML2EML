@@ -812,7 +812,7 @@ class MathML( object ):
             self.tag[ 'not' ] : 8,
             
           # calculus elements
-            self.tag[ 'diff' ] : 0,
+            self.tag[ 'diff' ] : 8,
             
           # qualifier elements
             self.tag[ 'degree' ] : 0,
@@ -870,16 +870,18 @@ class MathML( object ):
         }
     
         ## ------------------------------------------
-        ## 方程式の型
+        ## 方程式の型、従属変数
         ## ------------------------------------------
         if type:
             self.type = type
+            self.variable = None
         else:
             self.type = self.get_equation_type()      ## 方程式の型。以下の定数のいずれかを持つ
+            self.variable = self.get_equation_variable()
         
     
     ##-------------------------------------------------------------------------------------------------
-    ## 左右の辺、方程式の型の取得メソッド
+    ## 左右の辺、方程式の型、従属変数の取得メソッド
     ##-------------------------------------------------------------------------------------------------
     def get_equation_type( self ):
         
@@ -897,6 +899,21 @@ class MathML( object ):
         for type, tag_pattern in self.tag_pattern.iteritems():
             if tags in tag_pattern:
                 return type
+        
+        return False
+    
+    ##-------------------------------------------------------------------------------------------------
+    def get_equation_variable( self ):
+        
+        left_side_Element = self._get_left_side_Element()
+        
+        if left_side_Element == None:
+            raise TypeError, "Left side of equation is not found."
+        
+        if left_side_Element.tag == self.tag[ 'apply' ]:  # differential equasion
+            return left_side_Element.findall( './*' ).pop().text
+        else:
+            return left_side_Element.text
         
         return False
     
@@ -960,7 +977,14 @@ class MathML( object ):
     ##-------------------------------------------------------------------------------------------------
     def get_expression_str( self ):
         
-        return self._convert_element_to_Expression( self.root_node ).string
+        if self.type in ( self.ALGEBRAIC_EQUATION,
+                          self.ASSIGNMENT_EQUATION,
+                          self.RATE_EQUATION ):
+            
+            return '%s = %s' % ( self.get_left_side().get_expression_str(),
+                                 self.get_right_side().get_expression_str() )
+        else:
+            return self._convert_element_to_Expression( self.root_node ).string
     
     ##-------------------------------------------------------------------------------------------------
     def _convert_element_to_Expression( self, element ):
@@ -1160,6 +1184,19 @@ class MathML( object ):
                     chained_string = 'and( %s, %s )' % ( chained_string, chain.pop( 0 ) )
                 
                 return elf.Expression( chained_string, self.operator_priority[ self.tag[ 'and' ] ] )
+        
+        # diff
+        elif tag == self.tag[ 'diff' ]:
+            if len( children_Expressions ) != 2:
+                raise TypeError, '"diff" element must have exactly 2 children.'
+            
+            ci   = children.pop().text
+            bvar = children.pop()
+            
+            if bvar.findall( './*' ).pop().text == 'time':
+                return self.Expression( 'd(%s)/dt' % ci, self.operator_priority[ tag ] )
+            else:
+                return self.Expression( 'd(%s)/d(%s)' % ( ci, bvar.findall( './*' ).pop().text ), self.operator_priority[ tag ] )
         
         return self.Expression( '((( %s,... )))' % self._get_tag_without_namespace( tag ), 255 )
     

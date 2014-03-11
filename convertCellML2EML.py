@@ -57,5 +57,5 @@ CM = CellML( './tentusscher_noble_noble_panfilov_2004_a.cellml' )
 
 for component in CM.components.itervalues():
     for math in component[ 'math' ]:
-       print 'Right: %s' % math.get_right_side().get_expression_str()
-       
+       print '\n' + math.get_expression_str()
+
