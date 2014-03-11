@@ -28,18 +28,45 @@
 # 
 #END_HEADER
 
-__program__ = 'convertCellML2EML'
-__version__ = '0.1'
-__author__ = 'Yasuhiro Naito <ynaito@e-cell.org>'
-__copyright__ = ''
-__license__ = ''
+__program__   = 'convertCellML2EML'
+__version__   = '0.1'
+__author__    = 'Yasuhiro Naito <ynaito@e-cell.org>'
+__copyright__ = 'Keio University, RIKEN'
+__license__   = 'GPL'
 
 from CellML import *
 
-
-
-
-
+class ecell3Model( object ):
+    
+    def __init__( self, CellML ):
+        
+        self.Systems = self.getSystems( CellML )
+    
+    def getSystems( self, CellML ):
+        
+        _Systems = { '/' : '' }  ## component : ecell3_path
+        
+        for me, children in CellML.containment_hierarchies.iteritems():
+            
+            self._getSubSystems( _Systems, '/', me, children )
+            
+    def _getSubSystems( self, _Systems, parent, me, children ):
+        
+        if _Systems[ parent ] == '':
+            _Systems[ me ] = '/'
+            
+        elif _Systems[ parent ] == '/':
+            _Systems[ me ] = '/' + parent
+            
+        else:
+            _Systems[ me ] = '%s/%s' % ( _Systems[ parent ], parent )
+        
+        print 'System:%s:%s' % ( _Systems[ me ], me )
+        
+        for child, grandchildren in children.iteritems():
+            self._getSubSystems( _Systems, me, child, grandchildren )
+        
+        return _Systems
 
 
 ########  MAIN  ########
@@ -58,4 +85,9 @@ CM = CellML( './tentusscher_noble_noble_panfilov_2004_a.cellml' )
 for component in CM.components.itervalues():
     for math in component[ 'math' ]:
        print '\n' + math.get_expression_str()
+#       pass
 
+model = ecell3Model( CM )
+
+for component, FullID in model.Systems.iteritems():
+    print '{} : {}'.format( component, FullID )

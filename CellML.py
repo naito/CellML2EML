@@ -27,11 +27,30 @@
 # 
 #END_HEADER
 
-__program__ = 'CellML'
-__version__ = '0.1'
-__author__ = 'Yasuhiro Naito <ynaito@e-cell.org>'
-__copyright__ = ''
-__license__ = ''
+__program__   = 'CellML'
+__version__   = '0.1'
+__author__    = 'Yasuhiro Naito <ynaito@e-cell.org>'
+__copyright__ = 'Keio University, RIKEN'
+__license__   = 'GPL'
+
+## ------------------------------------------
+## 定数：名前空間
+## ------------------------------------------
+CELLML_NAMESPACE_1_0  = 'http://www.cellml.org/cellml/1.0#'
+CELLML_NAMESPACE_1_1  = 'http://www.cellml.org/cellml/1.1#'
+MATHML_NAMESPACE      = 'http://www.w3.org/1998/Math/MathML'
+
+
+## ------------------------------------------
+## 定数：方程式の型
+## ------------------------------------------
+CELLML_MATH_ALGEBRAIC_EQUATION  = 0
+CELLML_MATH_ASSIGNMENT_EQUATION = 1
+CELLML_MATH_RATE_EQUATION       = 2
+
+CELLML_MATH_LEFT_SIDE  = 10
+CELLML_MATH_RIGHT_SIDE = 11
+
 
 import xml.etree.ElementTree as et
 from xml.etree.ElementTree import XMLParser
@@ -65,10 +84,12 @@ class CellML( object ):
             map_components   = '{%s}map_components' % self.namespace,
             map_variables    = '{%s}map_variables' % self.namespace,
 
-            math       = '{http://www.w3.org/1998/Math/MathML}math',
-            apply      = '{http://www.w3.org/1998/Math/MathML}apply',
-            math_apply = '{http://www.w3.org/1998/Math/MathML}math/{http://www.w3.org/1998/Math/MathML}apply',
+            math       = '{{{}}}math'.format( MATHML_NAMESPACE ),
+            apply      = '{{{}}}apply'.format( MATHML_NAMESPACE ),
+            math_apply = '{{{0}}}math/{{{0}}}apply'.format( MATHML_NAMESPACE ),
         )
+
+        print self.tag
 
         self.components = {}
         self.variable_attributes = ( 'initial_value', 'public_interface', 'private_interface', 'units' )
@@ -404,107 +425,96 @@ class MathML( object ):
         # self.left_side  = self._get_left_side_Element()    ## 左辺のElementオブジェクト
         # self.right_side = self._get_right_side_Element()   ## 右辺のElementオブジェクト
         
-        ## ------------------------------------------
-        ## 方程式の型定数
-        ## ------------------------------------------
-        self.ALGEBRAIC_EQUATION  = 0
-        self.ASSIGNMENT_EQUATION = 1
-        self.RATE_EQUATION       = 2
-        
-        self.LEFT_SIDE  = 10
-        self.RIGHT_SIDE = 11
-        
-        
         # CellML 1.0 で使用できる MathML タグ（https://www.cellml.org/specifications/cellml_1.0/index_html#sec_mathematics）
         self.tag = {
             
-            'math' : '{http://www.w3.org/1998/Math/MathML}math',
+            'math' : '{{{0}}}math'.format( MATHML_NAMESPACE ),
             
           # token elements
-            'cn' : '{http://www.w3.org/1998/Math/MathML}cn',
-            'ci' : '{http://www.w3.org/1998/Math/MathML}ci',
+            'cn' : '{{{0}}}cn'.format( MATHML_NAMESPACE ),
+            'ci' : '{{{0}}}ci'.format( MATHML_NAMESPACE ),
             
           # basic content elements
-            'apply' : '{http://www.w3.org/1998/Math/MathML}apply',
-            'piecewise' : '{http://www.w3.org/1998/Math/MathML}piecewise',
-            'piece' : '{http://www.w3.org/1998/Math/MathML}piece',
-            'otherwise' : '{http://www.w3.org/1998/Math/MathML}otherwise',
+            'apply'     : '{{{0}}}apply'.format( MATHML_NAMESPACE ),
+            'piecewise' : '{{{0}}}piecewise'.format( MATHML_NAMESPACE ),
+            'piece'     : '{{{0}}}piece'.format( MATHML_NAMESPACE ),
+            'otherwise' : '{{{0}}}otherwise'.format( MATHML_NAMESPACE ),
             
           # relational operators
-            'eq' : '{http://www.w3.org/1998/Math/MathML}eq',
-            'neq' : '{http://www.w3.org/1998/Math/MathML}neq',
-            'gt' : '{http://www.w3.org/1998/Math/MathML}gt',
-            'lt' : '{http://www.w3.org/1998/Math/MathML}lt',
-            'geq' : '{http://www.w3.org/1998/Math/MathML}geq',
-            'leq' : '{http://www.w3.org/1998/Math/MathML}leq',
+            'eq'  : '{{{0}}}eq'.format( MATHML_NAMESPACE ),
+            'neq' : '{{{0}}}neq'.format( MATHML_NAMESPACE ),
+            'gt'  : '{{{0}}}gt'.format( MATHML_NAMESPACE ),
+            'lt'  : '{{{0}}}lt'.format( MATHML_NAMESPACE ),
+            'geq' : '{{{0}}}geq'.format( MATHML_NAMESPACE ),
+            'leq' : '{{{0}}}leq'.format( MATHML_NAMESPACE ),
             
           # arithmetic operators
-            'plus' : '{http://www.w3.org/1998/Math/MathML}plus',
-            'minus' : '{http://www.w3.org/1998/Math/MathML}minus',
-            'times' : '{http://www.w3.org/1998/Math/MathML}times',
-            'divide' : '{http://www.w3.org/1998/Math/MathML}divide',
-            'power' : '{http://www.w3.org/1998/Math/MathML}power',
-            'root' : '{http://www.w3.org/1998/Math/MathML}root',
-            'abs' : '{http://www.w3.org/1998/Math/MathML}abs',
-            'exp' : '{http://www.w3.org/1998/Math/MathML}exp',
-            'ln' : '{http://www.w3.org/1998/Math/MathML}ln',
-            'log' : '{http://www.w3.org/1998/Math/MathML}log',
-            'floor' : '{http://www.w3.org/1998/Math/MathML}floor',
-            'ceiling' : '{http://www.w3.org/1998/Math/MathML}ceiling',
-            'factorial' : '{http://www.w3.org/1998/Math/MathML}factorial',
+            'plus'      : '{{{0}}}plus'.format( MATHML_NAMESPACE ),
+            'minus'     : '{{{0}}}minus'.format( MATHML_NAMESPACE ),
+            'times'     : '{{{0}}}times'.format( MATHML_NAMESPACE ),
+            'divide'    : '{{{0}}}divide'.format( MATHML_NAMESPACE ),
+            'power'     : '{{{0}}}power'.format( MATHML_NAMESPACE ),
+            'root'      : '{{{0}}}root'.format( MATHML_NAMESPACE ),
+            'abs'       : '{{{0}}}abs'.format( MATHML_NAMESPACE ),
+            'exp'       : '{{{0}}}exp'.format( MATHML_NAMESPACE ),
+            'ln'        : '{{{0}}}ln'.format( MATHML_NAMESPACE ),
+            'log'       : '{{{0}}}log'.format( MATHML_NAMESPACE ),
+            'floor'     : '{{{0}}}floor'.format( MATHML_NAMESPACE ),
+            'ceiling'   : '{{{0}}}ceiling'.format( MATHML_NAMESPACE ),
+            'factorial' : '{{{0}}}factorial'.format( MATHML_NAMESPACE ),
             
           # logical operators
-            'and' : '{http://www.w3.org/1998/Math/MathML}and',
-            'or' : '{http://www.w3.org/1998/Math/MathML}or',
-            'xor' : '{http://www.w3.org/1998/Math/MathML}xor',
-            'not' : '{http://www.w3.org/1998/Math/MathML}not',
+            'and' : '{{{0}}}and'.format( MATHML_NAMESPACE ),
+            'or'  : '{{{0}}}or'.format( MATHML_NAMESPACE ),
+            'xor' : '{{{0}}}xor'.format( MATHML_NAMESPACE ),
+            'not' : '{{{0}}}not'.format( MATHML_NAMESPACE ),
             
           # calculus elements
-            'diff' : '{http://www.w3.org/1998/Math/MathML}diff',
+            'diff' : '{{{0}}}diff'.format( MATHML_NAMESPACE ),
             
           # qualifier elements
-            'degree' : '{http://www.w3.org/1998/Math/MathML}degree',
-            'bvar' : '{http://www.w3.org/1998/Math/MathML}bvar',
-            'logbase' : '{http://www.w3.org/1998/Math/MathML}logbase',
+            'degree'  : '{{{0}}}degree'.format( MATHML_NAMESPACE ),
+            'bvar'    : '{{{0}}}bvar'.format( MATHML_NAMESPACE ),
+            'logbase' : '{{{0}}}logbase'.format( MATHML_NAMESPACE ),
             
           # trigonometric operators
-            'sin' : '{http://www.w3.org/1998/Math/MathML}sin',
-            'cos' : '{http://www.w3.org/1998/Math/MathML}cos',
-            'tan' : '{http://www.w3.org/1998/Math/MathML}tan',
-            'sec' : '{http://www.w3.org/1998/Math/MathML}sec',
-            'csc' : '{http://www.w3.org/1998/Math/MathML}csc',
-            'cot' : '{http://www.w3.org/1998/Math/MathML}cot',
-            'sinh' : '{http://www.w3.org/1998/Math/MathML}sinh',
-            'cosh' : '{http://www.w3.org/1998/Math/MathML}cosh',
-            'tanh' : '{http://www.w3.org/1998/Math/MathML}tanh',
-            'sech' : '{http://www.w3.org/1998/Math/MathML}sech',
-            'csch' : '{http://www.w3.org/1998/Math/MathML}csch',
-            'coth' : '{http://www.w3.org/1998/Math/MathML}coth',
-            'arcsin' : '{http://www.w3.org/1998/Math/MathML}arcsin',
-            'arccos' : '{http://www.w3.org/1998/Math/MathML}arccos',
-            'arctan' : '{http://www.w3.org/1998/Math/MathML}arctan',
-            'arccosh' : '{http://www.w3.org/1998/Math/MathML}arccosh',
-            'arccot' : '{http://www.w3.org/1998/Math/MathML}arccot',
-            'arccoth' : '{http://www.w3.org/1998/Math/MathML}arccoth',
-            'arccsc' : '{http://www.w3.org/1998/Math/MathML}arccsc',
-            'arccsch' : '{http://www.w3.org/1998/Math/MathML}arccsch',
-            'arcsec' : '{http://www.w3.org/1998/Math/MathML}arcsec',
-            'arcsech' : '{http://www.w3.org/1998/Math/MathML}arcsech',
-            'arcsinh' : '{http://www.w3.org/1998/Math/MathML}arcsinh',
-            'arctanh' : '{http://www.w3.org/1998/Math/MathML}arctanh',
+            'sin'     : '{{{0}}}sin'.format( MATHML_NAMESPACE ),
+            'cos'     : '{{{0}}}cos'.format( MATHML_NAMESPACE ),
+            'tan'     : '{{{0}}}tan'.format( MATHML_NAMESPACE ),
+            'sec'     : '{{{0}}}sec'.format( MATHML_NAMESPACE ),
+            'csc'     : '{{{0}}}csc'.format( MATHML_NAMESPACE ),
+            'cot'     : '{{{0}}}cot'.format( MATHML_NAMESPACE ),
+            'sinh'    : '{{{0}}}sinh'.format( MATHML_NAMESPACE ),
+            'cosh'    : '{{{0}}}cosh'.format( MATHML_NAMESPACE ),
+            'tanh'    : '{{{0}}}tanh'.format( MATHML_NAMESPACE ),
+            'sech'    : '{{{0}}}sech'.format( MATHML_NAMESPACE ),
+            'csch'    : '{{{0}}}csch'.format( MATHML_NAMESPACE ),
+            'coth'    : '{{{0}}}coth'.format( MATHML_NAMESPACE ),
+            'arcsin'  : '{{{0}}}arcsin'.format( MATHML_NAMESPACE ),
+            'arccos'  : '{{{0}}}arccos'.format( MATHML_NAMESPACE ),
+            'arctan'  : '{{{0}}}arctan'.format( MATHML_NAMESPACE ),
+            'arccosh' : '{{{0}}}arccosh'.format( MATHML_NAMESPACE ),
+            'arccot'  : '{{{0}}}arccot'.format( MATHML_NAMESPACE ),
+            'arccoth' : '{{{0}}}arccoth'.format( MATHML_NAMESPACE ),
+            'arccsc'  : '{{{0}}}arccsc'.format( MATHML_NAMESPACE ),
+            'arccsch' : '{{{0}}}arccsch'.format( MATHML_NAMESPACE ),
+            'arcsec'  : '{{{0}}}arcsec'.format( MATHML_NAMESPACE ),
+            'arcsech' : '{{{0}}}arcsech'.format( MATHML_NAMESPACE ),
+            'arcsinh' : '{{{0}}}arcsinh'.format( MATHML_NAMESPACE ),
+            'arctanh' : '{{{0}}}arctanh'.format( MATHML_NAMESPACE ),
             
           # constants
-            'true' : '{http://www.w3.org/1998/Math/MathML}true',
-            'false' : '{http://www.w3.org/1998/Math/MathML}false',
-            'notanumber' : '{http://www.w3.org/1998/Math/MathML}notanumber',
-            'pi' : '{http://www.w3.org/1998/Math/MathML}pi',
-            'infinity' : '{http://www.w3.org/1998/Math/MathML}infinity',
-            'exponentiale' : '{http://www.w3.org/1998/Math/MathML}exponentiale',
+            'true'         : '{{{0}}}true'.format( MATHML_NAMESPACE ),
+            'false'        : '{{{0}}}false'.format( MATHML_NAMESPACE ),
+            'notanumber'   : '{{{0}}}notanumber'.format( MATHML_NAMESPACE ),
+            'pi'           : '{{{0}}}pi'.format( MATHML_NAMESPACE ),
+            'infinity'     : '{{{0}}}infinity'.format( MATHML_NAMESPACE ),
+            'exponentiale' : '{{{0}}}exponentiale'.format( MATHML_NAMESPACE ),
             
           # semantics and annotation elements
-            'semantics' : '{http://www.w3.org/1998/Math/MathML}semantics',
-            'annotation' : '{http://www.w3.org/1998/Math/MathML}annotation',
-            'annotation-xml' : '{http://www.w3.org/1998/Math/MathML}annotation-xml',
+            'semantics'      : '{{{0}}}semantics'.format( MATHML_NAMESPACE ),
+            'annotation'     : '{{{0}}}annotation'.format( MATHML_NAMESPACE ),
+            'annotation-xml' : '{{{0}}}annotation-xml'.format( MATHML_NAMESPACE ),
             
         }
         
@@ -777,37 +787,37 @@ class MathML( object ):
             self.tag[ 'ci' ] : 8,
             
           # basic content elements
-            self.tag[ 'apply' ] : 0,
+            self.tag[ 'apply' ]     : 0,
             self.tag[ 'piecewise' ] : 8,
-            self.tag[ 'piece' ] : 0,
+            self.tag[ 'piece' ]     : 0,
             self.tag[ 'otherwise' ] : 0,
             
           # relational operators
-            self.tag[ 'eq' ] : 0,
+            self.tag[ 'eq' ]  : 0,
             self.tag[ 'neq' ] : 0,
-            self.tag[ 'gt' ] : 0,
-            self.tag[ 'lt' ] : 0,
+            self.tag[ 'gt' ]  : 0,
+            self.tag[ 'lt' ]  : 0,
             self.tag[ 'geq' ] : 0,
             self.tag[ 'leq' ] : 0,
             
           # arithmetic operators
-            self.tag[ 'plus' ] : 2,
-            self.tag[ 'minus' ] : 2,
-            self.tag[ 'times' ] : 4,
-            self.tag[ 'divide' ] : 4,
-            self.tag[ 'power' ] : 8,
-            self.tag[ 'root' ] : 8,
-            self.tag[ 'abs' ] : 8,
-            self.tag[ 'exp' ] : 8,
-            self.tag[ 'ln' ] : 8,
-            self.tag[ 'log' ] : 8,
-            self.tag[ 'floor' ] : 8,
-            self.tag[ 'ceiling' ] : 8,
+            self.tag[ 'plus' ]      : 2,
+            self.tag[ 'minus' ]     : 2,
+            self.tag[ 'times' ]     : 4,
+            self.tag[ 'divide' ]    : 4,
+            self.tag[ 'power' ]     : 8,
+            self.tag[ 'root' ]      : 8,
+            self.tag[ 'abs' ]       : 8,
+            self.tag[ 'exp' ]       : 8,
+            self.tag[ 'ln' ]        : 8,
+            self.tag[ 'log' ]       : 8,
+            self.tag[ 'floor' ]     : 8,
+            self.tag[ 'ceiling' ]   : 8,
             self.tag[ 'factorial' ] : 8,
             
           # logical operators
             self.tag[ 'and' ] : 8,
-            self.tag[ 'or' ] : 8,
+            self.tag[ 'or' ]  : 8,
             self.tag[ 'xor' ] : 8,
             self.tag[ 'not' ] : 8,
             
@@ -815,47 +825,47 @@ class MathML( object ):
             self.tag[ 'diff' ] : 8,
             
           # qualifier elements
-            self.tag[ 'degree' ] : 0,
-            self.tag[ 'bvar' ] : 0,
+            self.tag[ 'degree' ]  : 0,
+            self.tag[ 'bvar' ]    : 0,
             self.tag[ 'logbase' ] : 0,
             
           # trigonometric operators
-            self.tag[ 'sin' ] : 0,
-            self.tag[ 'cos' ] : 0,
-            self.tag[ 'tan' ] : 0,
-            self.tag[ 'sec' ] : 0,
-            self.tag[ 'csc' ] : 0,
-            self.tag[ 'cot' ] : 0,
-            self.tag[ 'sinh' ] : 0,
-            self.tag[ 'cosh' ] : 0,
-            self.tag[ 'tanh' ] : 0,
-            self.tag[ 'sech' ] : 0,
-            self.tag[ 'csch' ] : 0,
-            self.tag[ 'coth' ] : 0,
-            self.tag[ 'arcsin' ] : 0,
-            self.tag[ 'arccos' ] : 0,
-            self.tag[ 'arctan' ] : 0,
+            self.tag[ 'sin' ]     : 0,
+            self.tag[ 'cos' ]     : 0,
+            self.tag[ 'tan' ]     : 0,
+            self.tag[ 'sec' ]     : 0,
+            self.tag[ 'csc' ]     : 0,
+            self.tag[ 'cot' ]     : 0,
+            self.tag[ 'sinh' ]    : 0,
+            self.tag[ 'cosh' ]    : 0,
+            self.tag[ 'tanh' ]    : 0,
+            self.tag[ 'sech' ]    : 0,
+            self.tag[ 'csch' ]    : 0,
+            self.tag[ 'coth' ]    : 0,
+            self.tag[ 'arcsin' ]  : 0,
+            self.tag[ 'arccos' ]  : 0,
+            self.tag[ 'arctan' ]  : 0,
             self.tag[ 'arccosh' ] : 0,
-            self.tag[ 'arccot' ] : 0,
+            self.tag[ 'arccot' ]  : 0,
             self.tag[ 'arccoth' ] : 0,
-            self.tag[ 'arccsc' ] : 0,
+            self.tag[ 'arccsc' ]  : 0,
             self.tag[ 'arccsch' ] : 0,
-            self.tag[ 'arcsec' ] : 0,
+            self.tag[ 'arcsec' ]  : 0,
             self.tag[ 'arcsech' ] : 0,
             self.tag[ 'arcsinh' ] : 0,
             self.tag[ 'arctanh' ] : 0,
             
           # constants
-            self.tag[ 'true' ] : 0,
-            self.tag[ 'false' ] : 0,
-            self.tag[ 'notanumber' ] : 0,
-            self.tag[ 'pi' ] : 0,
-            self.tag[ 'infinity' ] : 0,
+            self.tag[ 'true' ]         : 0,
+            self.tag[ 'false' ]        : 0,
+            self.tag[ 'notanumber' ]   : 0,
+            self.tag[ 'pi' ]           : 0,
+            self.tag[ 'infinity' ]     : 0,
             self.tag[ 'exponentiale' ] : 0,
             
           # semantics and annotation elements
-            self.tag[ 'semantics' ] : 0,
-            self.tag[ 'annotation' ] : 0,
+            self.tag[ 'semantics' ]      : 0,
+            self.tag[ 'annotation' ]     : 0,
             self.tag[ 'annotation-xml' ] : 0,
         }
         
@@ -865,8 +875,8 @@ class MathML( object ):
         ## 階層化せず、ベタに上から下へ読んだ場合のパターン
         ## ------------------------------------------
         self.tag_pattern = {
-            self.ASSIGNMENT_EQUATION : [ [ self.tag[ 'ci' ] ] ],
-            self.RATE_EQUATION       : [ [ self.tag[ 'apply' ], self.tag[ 'diff' ], self.tag[ 'bvar' ], self.tag[ 'ci' ], self.tag[ 'ci' ] ] ]
+            CELLML_MATH_ASSIGNMENT_EQUATION : [ [ self.tag[ 'ci' ] ] ],
+            CELLML_MATH_RATE_EQUATION       : [ [ self.tag[ 'apply' ], self.tag[ 'diff' ], self.tag[ 'bvar' ], self.tag[ 'ci' ], self.tag[ 'ci' ] ] ]
         }
     
         ## ------------------------------------------
@@ -919,7 +929,7 @@ class MathML( object ):
     
     ##-------------------------------------------------------------------------------------------------
     def get_left_side( self ):
-        return MathML( self._get_left_side_Element(), self.LEFT_SIDE )
+        return MathML( self._get_left_side_Element(), CELLML_MATH_LEFT_SIDE )
     
     ##-------------------------------------------------------------------------------------------------
     def _get_left_side_Element( self ):
@@ -950,7 +960,7 @@ class MathML( object ):
         
     ##-------------------------------------------------------------------------------------------------
     def get_right_side( self ):
-        return MathML( self._get_right_side_Element(), self.RIGHT_SIDE )
+        return MathML( self._get_right_side_Element(), CELLML_MATH_RIGHT_SIDE )
     
     ##-------------------------------------------------------------------------------------------------
     def _get_right_side_Element( self ):
@@ -977,9 +987,9 @@ class MathML( object ):
     ##-------------------------------------------------------------------------------------------------
     def get_expression_str( self ):
         
-        if self.type in ( self.ALGEBRAIC_EQUATION,
-                          self.ASSIGNMENT_EQUATION,
-                          self.RATE_EQUATION ):
+        if self.type in ( CELLML_MATH_ALGEBRAIC_EQUATION,
+                          CELLML_MATH_ASSIGNMENT_EQUATION,
+                          CELLML_MATH_RATE_EQUATION ):
             
             return '%s = %s' % ( self.get_left_side().get_expression_str(),
                                  self.get_right_side().get_expression_str() )
