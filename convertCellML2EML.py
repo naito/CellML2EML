@@ -46,41 +46,34 @@ class ecell3Model( object ):
         
         self.Entity_type_strings = [ 'System', 'Variable', 'Process', 'Stepper' ]
         
-        self.Systems   = self._getSystems( CellML )
-        
-        #print self.Systems
+        self.Systems = {}
+        self._getSystems( CellML )
+        print '\nSystem:\n%s\n' % self.Systems
         
         self.Variables = self._getVariables( CellML )
     
     ##-------------------------------------------------------------------------------------------------
     def _getSystems( self, CellML ):
         
-        _Systems = { '/' : '' }  ## component (ID) : ecell3_path
+        self.Systems [ '/' ] = ''  ## component (ID) : ecell3_path
         
         for me, children in CellML.containment_hierarchies.iteritems():
             
-            self._getSubSystems( _Systems, '/', me, children )
-        
-        return _Systems
+            self._getSubSystems( '/', me, children )
         
     ##-------------------------------------------------------------------------------------------------
-    def _getSubSystems( self, _Systems, parent, me, children ):
+    def _getSubSystems( self, parent, me, children ):
         
-        if _Systems[ parent ] == '':
-            _Systems[ me ] = '/'
-            
-        elif _Systems[ parent ] == '/':
-            _Systems[ me ] = '/' + parent
+        if self.Systems[ parent ] == '':
+            self.Systems[ me ] = '/'
             
         else:
-            _Systems[ me ] = self._connect_paths( ( _Systems[ parent ], parent ) )
+            self.Systems[ me ] = self._connect_paths( ( self.Systems[ parent ], parent ) )
         
-        #print 'System:%s:%s' % ( _Systems[ me ], me )
+        #print 'System:%s:%s' % ( self.Systems[ me ], me )
         
         for child, grandchildren in children.iteritems():
-            self._getSubSystems( _Systems, me, child, grandchildren )
-        
-        return _Systems
+            self._getSubSystems( me, child, grandchildren )
         
     ##-------------------------------------------------------------------------------------------------
     def _getVariables( self, CellML ):
@@ -89,14 +82,16 @@ class ecell3Model( object ):
         
         for actual, properties in CellML.unique_variables.iteritems():
             
-            _Variables[ actual[ 1 ] ] = dict( 
-                superSystem   = 'System:{}:{}'.format( self._connect_paths( self.Systems[ actual[ 0 ] ] ), actual[ 0 ] ),
+            path, ID = actual
+            
+            _Variables[ ID ] = dict( 
+                superSystem   = self._connect_paths( ( self.Systems[ path ], path ) ),
                 initial_value = None )
             
             if properties[ 'variable' ].has_key( 'initial_value' ):
-                _Variables[ actual[ 1 ] ][ 'initialValue' ] = properties[ 'variable' ][ 'initial_value' ]
+                _Variables[ ID ][ 'initialValue' ] = properties[ 'variable' ][ 'initial_value' ]
             
-            print 'Variable:%s:%s' % ( _Variables[ actual[ 1 ] ][ 'superSystem' ], actual[ 1 ] )
+            print 'Variable:%s:%s' % ( _Variables[ ID ][ 'superSystem' ], ID )
             
         return _Variables
     
@@ -121,10 +116,14 @@ class ecell3Model( object ):
         floors = []
         
         for el in paths:
-            floors.extend( el.split( '/' ) )
+            if el != '/':
+                floors.extend( el.split( '/' ) )
         
         if floors[ 0 ] in self.Entity_type_strings:
             floors.pop( 0 )
+        
+        ## '' をフィルタアウトする！
+        
         
         if floors == [ '' ]:
             return '/'
