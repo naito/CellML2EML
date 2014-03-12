@@ -38,6 +38,7 @@ __license__   = 'GPL'
 from CellML import *
 
 from copy import deepcopy
+import re
 
 
 class ecell3Model( object ):
@@ -46,23 +47,27 @@ class ecell3Model( object ):
         
         self.Entity_type_strings = [ 'System', 'Variable', 'Process', 'Stepper' ]
         
-        self.Systems = {}
-        self._getSystems( CellML )
-        print '\nSystem:\n%s\n' % self.Systems
+        self.Systems   = {}
+        self.Variables = []
+        self.Processes = []
         
-        self.Variables = self._getVariables( CellML )
+        self._get_Systems( CellML )
+        #print '\nSystem:\n%s\n' % self.Systems
+        
+        self._get_Variables( CellML )
+        self._get_Processes( CellML )
     
     ##-------------------------------------------------------------------------------------------------
-    def _getSystems( self, CellML ):
+    def _get_Systems( self, CellML ):
         
         self.Systems [ '/' ] = ''  ## component (ID) : ecell3_path
         
         for me, children in CellML.containment_hierarchies.iteritems():
             
-            self._getSubSystems( '/', me, children )
+            self._get_sub_Systems( '/', me, children )
         
     ##-------------------------------------------------------------------------------------------------
-    def _getSubSystems( self, parent, me, children ):
+    def _get_sub_Systems( self, parent, me, children ):
         
         if self.Systems[ parent ] == '':
             self.Systems[ me ] = '/'
@@ -70,30 +75,88 @@ class ecell3Model( object ):
         else:
             self.Systems[ me ] = self._connect_paths( ( self.Systems[ parent ], parent ) )
         
-        #print 'System:%s:%s' % ( self.Systems[ me ], me )
-        
         for child, grandchildren in children.iteritems():
-            self._getSubSystems( me, child, grandchildren )
+            self._get_sub_Systems( me, child, grandchildren )
         
     ##-------------------------------------------------------------------------------------------------
-    def _getVariables( self, CellML ):
+    def _get_Variables( self, CellML ):
         
-        _Variables = {}
-        
-        for actual, properties in CellML.unique_variables.iteritems():
+        for actual, properties in CellML.grobal_variables.iteritems():
             
             path, ID = actual
             
-            _Variables[ ID ] = dict( 
-                superSystem   = self._connect_paths( ( self.Systems[ path ], path ) ),
-                initial_value = None )
-            
             if properties[ 'variable' ].has_key( 'initial_value' ):
-                _Variables[ ID ][ 'initialValue' ] = properties[ 'variable' ][ 'initial_value' ]
+                self.Variables.append( Variable( 
+                    self._connect_paths( ( self.Systems[ path ], path ) ),
+                    ID,
+                    properties[ 'variable' ][ 'initial_value' ] ) )
             
-            print 'Variable:%s:%s' % ( _Variables[ ID ][ 'superSystem' ], ID )
+            else:
+                self.Variables.append( Variable( 
+                    self._connect_paths( ( self.Systems[ path ], path ) ),
+                    ID ) )
             
-        return _Variables
+#            print 'Variable:%s:%s' % ( self.Variables[ -1 ].path, ID )
+    
+    ##-------------------------------------------------------------------------------------------------
+    def _get_Processes( self, CellML ):
+        
+        for c_name, c_property in CellML.components.iteritems():
+            
+            variables = [ self._get_grobal_variable( v, c_name, CellML ) for v in c_property[ 'variable' ] ]
+            math      = [ m for m in c_property[ 'math' ] ]
+            path      = self._connect_paths( ( self.Systems[ c_name ], c_name ) )
+            
+#            print '\nSystem: %s' % c_name
+#            print 'variables: %s' % variables
+            
+            [ self._math_to_Process( m, variables, path ) for m in math ]
+    
+    ##-------------------------------------------------------------------------------------------------
+    def _get_grobal_variable( self, variable, component, CellML ):
+        
+        for grobal_variable, pr in CellML.grobal_variables.iteritems():
+            
+            for local_variable in pr[ 'connection' ]:
+                if ( local_variable[ 'component' ] == component ) and ( local_variable[ 'variable' ] == variable ):
+                    path, ID = grobal_variable
+                    return ( variable, self._connect_paths( ( self.Systems[ path ], path ) ), ID )
+        
+        return ( variable, False, False )
+    
+    ##-------------------------------------------------------------------------------------------------
+    def _math_to_Process( self, math, variables, path ):
+        
+        ## math: MathMLオブジェクト
+        ## variables: variable名のリスト
+        ## path: path
+        
+        ID = math.variable
+        
+        if math.type == CELLML_MATH_ASSIGNMENT_EQUATION:
+            cls = 'ExpressionAssignmentProcess'
+        elif math.type == CELLML_MATH_RATE_EQUATION:
+            cls = 'ExpressionFluxProcess'
+        else:
+            return
+        
+        Expression = self._get_Expression( math, variables )
+        
+        self.Processes.append( Process( cls, path, ID, Expression ) )
+#        print '\n%s:%s:%s' % ( self.Processes[ -1 ].cls, self.Processes[ -1 ].path, self.Processes[ -1 ].ID )
+#        print '    %s\n' % self.Processes[ -1 ].Expression
+    
+    ##-------------------------------------------------------------------------------------------------
+    def _get_Expression( self, math, variables ):
+        
+        math_Element = deepcopy( math.right_side )
+        
+        for v in variables:
+            for ci in math_Element.iterfind( './/' + math.tag[ 'ci' ] ):
+                if ci.text == v[ 0 ]:
+                    ci.text = v[ 0 ] + '.Value'
+        
+        return MathML( math_Element, CELLML_MATH_RIGHT_SIDE ).get_expression_str()
     
     ##-------------------------------------------------------------------------------------------------
     def _connect_paths( self, paths ):
@@ -113,22 +176,47 @@ class ecell3Model( object ):
         else:
             raise TypeError, "paths must be list or str object."
         
-        floors = []
+        _paths = []
+        for dir in paths:
+            if dir != '/':
+                _paths.extend( dir.split( '/' ) )
+        paths = _paths
         
-        for el in paths:
-            if el != '/':
-                floors.extend( el.split( '/' ) )
+        if paths[ 0 ] in self.Entity_type_strings:
+            paths( 0 )
         
-        if floors[ 0 ] in self.Entity_type_strings:
-            floors.pop( 0 )
+        paths = [ p for p in paths if p != '' ]
         
-        ## '' をフィルタアウトする！
-        
-        
-        if floors == [ '' ]:
+        if paths == []:
             return '/'
-        else:
-            return '/'.join( floors )
+        elif not ( paths[ 0 ] in ( '.', '..' ) ):
+            paths.insert( 0, '' )
+        
+        return '/'.join( paths )
+
+
+class Variable( object ):
+        
+    def __init__( self, path, ID, Value = False, Name = '' ):
+        
+        self.path  = path
+        self.ID    = ID
+        self.Value = Value
+        self.Name  = Name
+        
+
+
+class Process( object ):
+        
+    def __init__( self, cls, path, ID, Expression = '', Name = '' ):
+        
+        self.cls        = cls
+        self.path       = path
+        self.ID         = ID
+        self.Expression = Expression
+        self.Name       = Name
+        
+
 
 
 ########  MAIN  ########
@@ -140,8 +228,8 @@ CM = CellML( './tentusscher_noble_noble_panfilov_2004_a.cellml' )
 
 #print 'namespace: %s' % CM.namespace
 #print '\n\ncomponent:\n%s' % CM.components
-#print '\n\nvariable:\n%s' % CM.unique_variables
-print '\n\ncontainment_hierarchies:\n%s' % CM.containment_hierarchies
+#print '\n\nvariable:\n%s' % CM.grobal_variables
+#print '\n\ncontainment_hierarchies:\n%s' % CM.containment_hierarchies
 #print '\n\nconnections:\n%s' % CM.connections
 
 for component in CM.components.itervalues():
@@ -152,4 +240,5 @@ for component in CM.components.itervalues():
 model = ecell3Model( CM )
 
 for component, FullID in model.Systems.iteritems():
-    print '{} : {}'.format( component, FullID )
+    #print '{} : {}'.format( component, FullID )
+    pass
