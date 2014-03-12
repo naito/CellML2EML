@@ -96,7 +96,7 @@ class CellML( object ):
         self.containment_hierarchies = {} ## encapsulation は要素間の隠蔽関係の定義なので、E-Cell 3 では記述対象外
         self.connections = []
         
-        self.unique_variables = {}
+        self.grobal_variables = {}
 
         self._get_components()
         self._get_containment_hierarchies()
@@ -116,7 +116,7 @@ class CellML( object ):
         ## }
         
         
-        for component_node in self.root_node.iterfind( self.tag[ 'component' ] ):
+        for component_node in self.root_node.iterfind( './/' + self.tag[ 'component' ] ):
             
             if not self._has_name( component_node ):
                 raise TypeError, "Component must have name attribute."
@@ -129,7 +129,7 @@ class CellML( object ):
             
             ## variables
             
-            for variable_node in component_node.iterfind( self.tag[ 'variable' ] ):
+            for variable_node in component_node.iterfind( './/' + self.tag[ 'variable' ] ):
                 
                 if not self._has_name( variable_node ):
                     raise TypeError, "Variable must have name attribute. ( in component: %s )" % component_node.get( 'name' )
@@ -140,7 +140,7 @@ class CellML( object ):
             
             ## math
             
-            for eq in component_node.findall( self.tag[ 'math_apply' ] ):
+            for eq in component_node.findall( './/' + self.tag[ 'math_apply' ] ):
                 self.components[ component_node.get( 'name' ) ][ 'math' ].append( MathML( eq ) )
 
     ##-------------------------------------------------------------------------------------------------
@@ -158,12 +158,12 @@ class CellML( object ):
         ##       comp_6 : {}
         ## }
 
-        for group_node in self.root_node.iterfind( self.tag[ 'group' ] ):
+        for group_node in self.root_node.iterfind( './/' + self.tag[ 'group' ] ):
             
-            if group_node.find( self.tag[ 'relationship_ref' ] ) == None:
+            if group_node.find( './/' + self.tag[ 'relationship_ref' ] ) == None:
                 raise TypeError, "<group> must have <relationship_ref> sub node."
             
-            if group_node.find( self.tag[ 'relationship_ref' ] ).get( 'relationship' ) == 'containment':
+            if group_node.find( './/' + self.tag[ 'relationship_ref' ] ).get( 'relationship' ) == 'containment':
                 for top_level_component_ref in group_node.iterfind( './' + self.tag[ 'component_ref' ] ):
                     
                     if top_level_component_ref.get( 'component' ) == None:
@@ -180,9 +180,9 @@ class CellML( object ):
             
     def exists_in_group( self, component_name ):
         
-        for group_node in self.root_node.iterfind( self.tag[ 'group' ] ):
-            if group_node.find( self.tag[ 'relationship_ref' ] ).get( 'relationship' ) == 'containment':
-                for component_ref_node in group_node.iterfind( self.tag[ 'component_ref' ] ):
+        for group_node in self.root_node.iterfind( './/' + self.tag[ 'group' ] ):
+            if group_node.find( './/' + self.tag[ 'relationship_ref' ] ).get( 'relationship' ) == 'containment':
+                for component_ref_node in group_node.iterfind( './/' + self.tag[ 'component_ref' ] ):
                      if component_name == component_ref_node.get( 'component' ):
                          return True
         return False
@@ -199,10 +199,10 @@ class CellML( object ):
         ##     self.components[ x ][ 'variable' ][ y ][ 'connection' ] = True
         ## に書き換える。
         
-        for connection_node in self.root_node.iterfind( self.tag[ 'connection' ] ):
+        for connection_node in self.root_node.iterfind( './/' + self.tag[ 'connection' ] ):
             
-            map_components = connection_node.find( self.tag[ 'map_components' ] )
-            map_variables_iter  = connection_node.iterfind( self.tag[ 'map_variables' ] )
+            map_components = connection_node.find( './/' + self.tag[ 'map_components' ] )
+            map_variables_iter  = connection_node.iterfind( './/' + self.tag[ 'map_variables' ] )
             
             if None in ( map_components, map_variables_iter ):
                 raise TypeError, "<connection> must have both of <map_components> and <map_variables> sub nodes."
@@ -242,7 +242,7 @@ class CellML( object ):
                     
                     variable_ID = dict( component = component_name, variable  = variable_name )
                     
-                    self.unique_variables[ ( component_name, variable_name ) ] = dict(
+                    self.grobal_variables[ ( component_name, variable_name ) ] = dict(
                         variable   = variable_element,
                         connection = [ variable_ID ] )
         
@@ -251,7 +251,7 @@ class CellML( object ):
             actual = self._get_actual_properties_of_variable( connection_map )
             
             if actual:
-                self.unique_variables[ ( actual[ 'component' ], actual[ 'name' ] ) ] = dict(
+                self.grobal_variables[ ( actual[ 'component' ], actual[ 'name' ] ) ] = dict(
                             variable   = actual[ 'variable' ],
                             connection = connection_map )
 
@@ -271,7 +271,7 @@ class CellML( object ):
         
         for variable_ID in connection_map:
             
-            if self.components[ variable_ID[ 'component' ] ][ 'variable' ][ variable_ID[ 'variable' ] ][ 'public_interface' ] == 'in':
+            if self.components[ variable_ID[ 'component' ] ][ 'variable' ][ variable_ID[ 'variable' ] ][ 'public_interface' ] == 'out':
                 
                 containing_component_IDs.append( variable_ID )
         
@@ -300,16 +300,8 @@ class CellML( object ):
     ##-------------------------------------------------------------------------------------------------
     def _get_actual_variable_ID( self, containing_component_IDs ):
         
-        score_dict = {}
-        
-        containing_components = []
-        
-        for ID in containing_component_IDs:
-            containing_components.append( ID[ 'component' ] )
-        
-        for component in containing_components:
-            
-            score_dict[ component ] = 0
+        containing_components = [ ID[ 'component' ] for ID in containing_component_IDs ]
+        score_dict = dict( [ ( c, 0 ) for c in containing_components ] )
         
         for component, sub_components in self.containment_hierarchies.iteritems():
             
@@ -321,6 +313,8 @@ class CellML( object ):
         max_score = 0
         actual_component = None
         
+#        print 'Actual extraction: %s' % score_dict
+        
         for component, score in score_dict.iteritems():
             
             if score > max_score:
@@ -331,6 +325,7 @@ class CellML( object ):
             
             if ID[ 'component' ] == actual_component:
                 
+#                print '                 : %s' % ID
                 return ID
 
 
@@ -903,7 +898,8 @@ class MathML( object ):
         else:
             self.type = self.get_equation_type()      ## 方程式の型。以下の定数のいずれかを持つ
             self.variable = self.get_equation_variable()
-        
+            self.right_side = self._get_right_side_Element()   ## 右辺のElement
+            self.string = self.get_right_side().get_expression_str()    ## 右辺の式を文字列にしたもの→Expressionとして使うテンプレート
     
     ##-------------------------------------------------------------------------------------------------
     ## 左右の辺、方程式の型、従属変数の取得メソッド
