@@ -110,7 +110,7 @@ class ecell3Model( object ):
 #            print '\nSystem: %s' % c_name
 #            print 'variables: %s' % variables
             
-            [ self._math_to_Process( m, variables, path ) for m in math ]
+            [ self._append_Process( m, variables, path ) for m in math ]
     
     ##-------------------------------------------------------------------------------------------------
     def _get_grobal_variable( self, variable, component, CellML ):
@@ -125,7 +125,7 @@ class ecell3Model( object ):
         return ( variable, False, False )
     
     ##-------------------------------------------------------------------------------------------------
-    def _math_to_Process( self, math, variables, path ):
+    def _append_Process( self, math, variables, path ):
         
         ## math: MathMLオブジェクト
         ## variables: variable名のリスト
@@ -140,23 +140,34 @@ class ecell3Model( object ):
         else:
             return
         
-        Expression = self._get_Expression( math, variables )
+        Expression, VariableReferenceList = self._get_Expression_and_VariableReferenceList( math, variables )
         
-        self.Processes.append( Process( cls, path, ID, Expression ) )
-#        print '\n%s:%s:%s' % ( self.Processes[ -1 ].cls, self.Processes[ -1 ].path, self.Processes[ -1 ].ID )
-#        print '    %s\n' % self.Processes[ -1 ].Expression
+        self.Processes.append( Process( cls, path, ID, VariableReferenceList, Expression ) )
+        print '\n%s:%s:%s' % ( self.Processes[ -1 ].cls, self.Processes[ -1 ].path, self.Processes[ -1 ].ID )
+        print '    %s' % self.Processes[ -1 ].Expression
+        print '    %s\n' % self.Processes[ -1 ].VariableReferenceList
     
     ##-------------------------------------------------------------------------------------------------
-    def _get_Expression( self, math, variables ):
+    def _get_Expression_and_VariableReferenceList( self, math, variables ):
         
         math_Element = deepcopy( math.right_side )
+        
+        VariableReferenceList = [ list( v ) for v in variables 
+            if ( v[ 0 ] in [ ci.text for ci in math_Element.findall( './/' + math.tag[ 'ci' ] ) ] ) ]
+        
+        for vr in VariableReferenceList:
+            if math.variable == vr[ 0 ]:
+                vr.append( 1 )
+            else:
+                vr.append( 0 )
         
         for v in variables:
             for ci in math_Element.iterfind( './/' + math.tag[ 'ci' ] ):
                 if ci.text == v[ 0 ]:
                     ci.text = v[ 0 ] + '.Value'
         
-        return MathML( math_Element, CELLML_MATH_RIGHT_SIDE ).get_expression_str()
+        return ( MathML( math_Element, CELLML_MATH_RIGHT_SIDE ).get_expression_str(),
+                 VariableReferenceList )
     
     ##-------------------------------------------------------------------------------------------------
     def _connect_paths( self, paths ):
@@ -208,14 +219,14 @@ class Variable( object ):
 
 class Process( object ):
         
-    def __init__( self, cls, path, ID, Expression = '', Name = '' ):
+    def __init__( self, cls, path, ID, VariableReferenceList, Expression = '0.0', Name = '' ):
         
         self.cls        = cls
         self.path       = path
         self.ID         = ID
         self.Expression = Expression
         self.Name       = Name
-        
+        self.VariableReferenceList = []
 
 
 
