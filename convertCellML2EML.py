@@ -248,11 +248,7 @@ class Variable( object ):
         
         self.path  = path
         self.ID    = ID
-        if isinstance( Value, numbers.Number ):
-            self.Value = Value
-        else:
-            self.Value = 0.0    #### for DEBUG
-#            self.Value = '__UNDEFINED__'
+        self.Value = Value
         self.Name  = Name
         
 
@@ -293,8 +289,16 @@ def get_eml( cellml_file_path ):
         
         _FullID = 'Variable:{0}:{1}'.format( v.path, v.ID )
         eml.createEntity( 'Variable', _FullID )
-        if v.Value == '__UNDEFINED__':       ## __UNDEFINED__ がEMLに埋め込まれるとsessionが転ける
-            eml.setEntityProperty( _FullID, 'Value', [ str( 0.0 ) ] )
+        if v.Value == None:       ## __UNDEFINED__ がEMLに埋め込まれるとsessionが転ける
+            input = raw_input( "\n[ {0} ]  doesn't have the initial value.\nEnter the value, or press return to skip:\n  -->> ".format( _FullID ) )
+#            print type( input )
+            try:
+                float( input )
+            except ValueError:
+                eml.setEntityProperty( _FullID, 'Value', [ '__UNDEFINED__' ] )
+                
+            else:
+                eml.setEntityProperty( _FullID, 'Value', [ str( input ) ] )
         else:
             eml.setEntityProperty( _FullID, 'Value', [ str( v.Value ) ] )
         eml.setEntityProperty( _FullID, 'Name',  [ v.Name ] )
@@ -312,11 +316,11 @@ def get_eml( cellml_file_path ):
 
 ########  MAIN  ########
 
-eml = get_eml( './tentusscher_noble_noble_panfilov_2004_a.cellml' )
-eml.save( './tentusscher_noble_noble_panfilov_2004_a.eml' )
+#eml = get_eml( './tentusscher_noble_noble_panfilov_2004_a.cellml' )
+#eml.save( './tentusscher_noble_noble_panfilov_2004_a.eml' )
 
-eml = get_eml( './hodgkin_huxley_1952.cellml' )
-eml.save( './hodgkin_huxley_1952.eml' )
+#eml = get_eml( './hodgkin_huxley_1952.cellml' )
+#eml.save( './hodgkin_huxley_1952.eml' )
 
 eml = get_eml( './goldbeter_1991.cellml' )
 eml.save( './goldbeter_1991.eml' )

@@ -27,7 +27,7 @@
 </property>
 <variable class="Variable" id="time">
 <property name="Value">
-<value>0.0</value>
+<value>0</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -51,7 +51,7 @@
 </property>
 <variable class="Variable" id="g_K1">
 <property name="Value">
-<value>0.0</value>
+<value>5.405</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -59,7 +59,7 @@
 </variable>
 <variable class="Variable" id="xK1_inf">
 <property name="Value">
-<value>0.0</value>
+<value>0.0497895286904</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -67,7 +67,7 @@
 </variable>
 <variable class="Variable" id="alpha_K1">
 <property name="Value">
-<value>0.0</value>
+<value>0.0999993693947</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -75,7 +75,7 @@
 </variable>
 <variable class="Variable" id="beta_K1">
 <property name="Value">
-<value>0.0</value>
+<value>1.90844240591</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -83,7 +83,7 @@
 </variable>
 <variable class="Variable" id="i_K1">
 <property name="Value">
-<value>0.0</value>
+<value>0.116640848612</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -222,7 +222,7 @@
 </property>
 <variable class="Variable" id="stim_start">
 <property name="Value">
-<value>0.0</value>
+<value>10</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -230,7 +230,7 @@
 </variable>
 <variable class="Variable" id="stim_period">
 <property name="Value">
-<value>0.0</value>
+<value>1000</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -238,7 +238,7 @@
 </variable>
 <variable class="Variable" id="stim_duration">
 <property name="Value">
-<value>0.0</value>
+<value>1</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -246,7 +246,7 @@
 </variable>
 <variable class="Variable" id="stim_amplitude">
 <property name="Value">
-<value>0.0</value>
+<value>52</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -254,7 +254,7 @@
 </variable>
 <variable class="Variable" id="R">
 <property name="Value">
-<value>0.0</value>
+<value>8314.472</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -262,7 +262,7 @@
 </variable>
 <variable class="Variable" id="T">
 <property name="Value">
-<value>0.0</value>
+<value>310</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -270,7 +270,7 @@
 </variable>
 <variable class="Variable" id="F">
 <property name="Value">
-<value>0.0</value>
+<value>96485.3415</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -278,7 +278,7 @@
 </variable>
 <variable class="Variable" id="V">
 <property name="Value">
-<value>0.0</value>
+<value>-86.2</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -286,7 +286,7 @@
 </variable>
 <variable class="Variable" id="V_c">
 <property name="Value">
-<value>0.0</value>
+<value>0.016404</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -294,7 +294,7 @@
 </variable>
 <variable class="Variable" id="Cm">
 <property name="Value">
-<value>0.0</value>
+<value>0.185</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -302,7 +302,7 @@
 </variable>
 <variable class="Variable" id="i_Stim">
 <property name="Value">
-<value>1.0</value>
+<value>0.0</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -446,7 +446,7 @@
 </property>
 <variable class="Variable" id="g_Na">
 <property name="Value">
-<value>0.0</value>
+<value>14.838</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -454,7 +454,7 @@
 </variable>
 <variable class="Variable" id="i_Na">
 <property name="Value">
-<value>0.0</value>
+<value>-0.0</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -523,7 +523,7 @@
 </property>
 <variable class="Variable" id="m_inf">
 <property name="Value">
-<value>0.0</value>
+<value>0.0013955263216</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -531,7 +531,7 @@
 </variable>
 <variable class="Variable" id="alpha_m">
 <property name="Value">
-<value>0.0</value>
+<value>0.00527231222695</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -539,7 +539,7 @@
 </variable>
 <variable class="Variable" id="beta_m">
 <property name="Value">
-<value>0.0</value>
+<value>0.166392613891</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -547,7 +547,7 @@
 </variable>
 <variable class="Variable" id="tau_m">
 <property name="Value">
-<value>0.0</value>
+<value>0.000877273812692</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -555,7 +555,7 @@
 </variable>
 <variable class="Variable" id="m">
 <property name="Value">
-<value>0.0</value>
+<value>0</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -689,7 +689,7 @@
 </property>
 <variable class="Variable" id="j_inf">
 <property name="Value">
-<value>0.0</value>
+<value>0.770528409604</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -697,7 +697,7 @@
 </variable>
 <variable class="Variable" id="alpha_j">
 <property name="Value">
-<value>1.0</value>
+<value>13293.8030299</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -705,7 +705,7 @@
 </variable>
 <variable class="Variable" id="beta_j">
 <property name="Value">
-<value>1.0</value>
+<value>0.0001049795004</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -713,7 +713,7 @@
 </variable>
 <variable class="Variable" id="tau_j">
 <property name="Value">
-<value>0.5</value>
+<value>7.52230185637e-05</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -721,7 +721,7 @@
 </variable>
 <variable class="Variable" id="j">
 <property name="Value">
-<value>0.0</value>
+<value>0.75</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -855,7 +855,7 @@
 </property>
 <variable class="Variable" id="h_inf">
 <property name="Value">
-<value>0.0</value>
+<value>0.770528409604</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -863,7 +863,7 @@
 </variable>
 <variable class="Variable" id="alpha_h">
 <property name="Value">
-<value>1.0</value>
+<value>0.141856498647</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -871,7 +871,7 @@
 </variable>
 <variable class="Variable" id="beta_h">
 <property name="Value">
-<value>1.0</value>
+<value>0.00297789419528</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -879,7 +879,7 @@
 </variable>
 <variable class="Variable" id="tau_h">
 <property name="Value">
-<value>0.5</value>
+<value>6.90443740867</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -887,7 +887,7 @@
 </variable>
 <variable class="Variable" id="h">
 <property name="Value">
-<value>0.0</value>
+<value>0.75</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -1021,7 +1021,7 @@
 </property>
 <variable class="Variable" id="g_to">
 <property name="Value">
-<value>0.0</value>
+<value>0.294</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -1093,7 +1093,7 @@
 </property>
 <variable class="Variable" id="s_inf">
 <property name="Value">
-<value>0.0</value>
+<value>0.999998221965</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -1101,7 +1101,7 @@
 </variable>
 <variable class="Variable" id="tau_s">
 <property name="Value">
-<value>0.0</value>
+<value>8.42238048389</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -1109,7 +1109,7 @@
 </variable>
 <variable class="Variable" id="s">
 <property name="Value">
-<value>0.0</value>
+<value>1</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -1198,7 +1198,7 @@
 </property>
 <variable class="Variable" id="r_inf">
 <property name="Value">
-<value>0.0</value>
+<value>2.0558321875e-08</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -1206,7 +1206,7 @@
 </variable>
 <variable class="Variable" id="tau_r">
 <property name="Value">
-<value>0.0</value>
+<value>3.70226596349</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -1214,7 +1214,7 @@
 </variable>
 <variable class="Variable" id="r">
 <property name="Value">
-<value>0.0</value>
+<value>0</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -1303,7 +1303,7 @@
 </property>
 <variable class="Variable" id="K_NaCa">
 <property name="Value">
-<value>0.0</value>
+<value>1000</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -1311,7 +1311,7 @@
 </variable>
 <variable class="Variable" id="K_sat">
 <property name="Value">
-<value>0.0</value>
+<value>0.1</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -1319,7 +1319,7 @@
 </variable>
 <variable class="Variable" id="alpha">
 <property name="Value">
-<value>0.0</value>
+<value>2.5</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -1327,7 +1327,7 @@
 </variable>
 <variable class="Variable" id="gamma">
 <property name="Value">
-<value>0.0</value>
+<value>0.35</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -1335,7 +1335,7 @@
 </variable>
 <variable class="Variable" id="Km_Ca">
 <property name="Value">
-<value>0.0</value>
+<value>1.38</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -1343,7 +1343,7 @@
 </variable>
 <variable class="Variable" id="Km_Nai">
 <property name="Value">
-<value>0.0</value>
+<value>87.5</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -1351,7 +1351,7 @@
 </variable>
 <variable class="Variable" id="i_NaCa">
 <property name="Value">
-<value>0.0</value>
+<value>-0.485536753407</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -1460,7 +1460,7 @@
 </property>
 <variable class="Variable" id="g_bca">
 <property name="Value">
-<value>0.0</value>
+<value>0.000592</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -1468,7 +1468,7 @@
 </variable>
 <variable class="Variable" id="i_b_Ca">
 <property name="Value">
-<value>0.0</value>
+<value>-0.123859077174</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -1522,7 +1522,7 @@
 </property>
 <variable class="Variable" id="P_NaK">
 <property name="Value">
-<value>0.0</value>
+<value>1.362</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -1530,7 +1530,7 @@
 </variable>
 <variable class="Variable" id="K_mk">
 <property name="Value">
-<value>0.0</value>
+<value>1</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -1538,7 +1538,7 @@
 </variable>
 <variable class="Variable" id="K_mNa">
 <property name="Value">
-<value>0.0</value>
+<value>40</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -1546,7 +1546,7 @@
 </variable>
 <variable class="Variable" id="i_NaK">
 <property name="Value">
-<value>0.0</value>
+<value>0.125322662069</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -1630,7 +1630,7 @@
 </property>
 <variable class="Variable" id="g_pK">
 <property name="Value">
-<value>0.0</value>
+<value>0.0146</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -1638,7 +1638,7 @@
 </variable>
 <variable class="Variable" id="i_p_K">
 <property name="Value">
-<value>0.0</value>
+<value>5.31405361398e-11</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -1692,7 +1692,7 @@
 </property>
 <variable class="Variable" id="g_CaL">
 <property name="Value">
-<value>0.0</value>
+<value>0.000175</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -1700,7 +1700,7 @@
 </variable>
 <variable class="Variable" id="i_CaL">
 <property name="Value">
-<value>0.0</value>
+<value>0</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -1708,7 +1708,7 @@
 </variable>
 <variable class="Variable" id="d">
 <property name="Value">
-<value>0.0</value>
+<value>1</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -1797,7 +1797,7 @@
 </property>
 <variable class="Variable" id="f_inf">
 <property name="Value">
-<value>0.0</value>
+<value>0.999921876604</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -1805,7 +1805,7 @@
 </variable>
 <variable class="Variable" id="tau_f">
 <property name="Value">
-<value>0.0</value>
+<value>80.0029561514</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -1813,7 +1813,7 @@
 </variable>
 <variable class="Variable" id="f">
 <property name="Value">
-<value>0.0</value>
+<value>1</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -1902,7 +1902,7 @@
 </property>
 <variable class="Variable" id="d_inf">
 <property name="Value">
-<value>0.0</value>
+<value>1.98623112461e-05</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -1910,7 +1910,7 @@
 </variable>
 <variable class="Variable" id="alpha_d">
 <property name="Value">
-<value>0.0</value>
+<value>0.276748411555</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -1918,7 +1918,7 @@
 </variable>
 <variable class="Variable" id="beta_d">
 <property name="Value">
-<value>0.0</value>
+<value>1.39999987607</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -1926,7 +1926,7 @@
 </variable>
 <variable class="Variable" id="gamma_d">
 <property name="Value">
-<value>0.0</value>
+<value>0.00110147830765</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -1934,7 +1934,7 @@
 </variable>
 <variable class="Variable" id="tau_d">
 <property name="Value">
-<value>0.0</value>
+<value>0.388549220187</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -2093,7 +2093,7 @@
 </property>
 <variable class="Variable" id="alpha_fCa">
 <property name="Value">
-<value>0.0</value>
+<value>0.979847380122</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -2101,7 +2101,7 @@
 </variable>
 <variable class="Variable" id="beta_fCa">
 <property name="Value">
-<value>0.0</value>
+<value>0.0952574126822</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -2109,7 +2109,7 @@
 </variable>
 <variable class="Variable" id="gama_fCa">
 <property name="Value">
-<value>0.0</value>
+<value>0.133082111749</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -2117,7 +2117,7 @@
 </variable>
 <variable class="Variable" id="fCa_inf">
 <property name="Value">
-<value>0.0</value>
+<value>0.985059523667</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -2133,7 +2133,7 @@
 </variable>
 <variable class="Variable" id="d_fCa">
 <property name="Value">
-<value>0.0</value>
+<value>-0.00747023816666</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -2141,7 +2141,7 @@
 </variable>
 <variable class="Variable" id="fCa">
 <property name="Value">
-<value>0.0</value>
+<value>1</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -2330,7 +2330,7 @@
 </property>
 <variable class="Variable" id="g_bna">
 <property name="Value">
-<value>0.0</value>
+<value>0.00029</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -2338,7 +2338,7 @@
 </variable>
 <variable class="Variable" id="i_b_Na">
 <property name="Value">
-<value>0.0</value>
+<value>-0.0442929439192</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -2392,7 +2392,7 @@
 </property>
 <variable class="Variable" id="g_Ks">
 <property name="Value">
-<value>0.0</value>
+<value>0.062</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -2400,7 +2400,7 @@
 </variable>
 <variable class="Variable" id="i_Ks">
 <property name="Value">
-<value>0.0</value>
+<value>-0.0</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -2459,7 +2459,7 @@
 </property>
 <variable class="Variable" id="xs_inf">
 <property name="Value">
-<value>0.0</value>
+<value>0.00301841632471</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -2467,7 +2467,7 @@
 </variable>
 <variable class="Variable" id="alpha_xs">
 <property name="Value">
-<value>0.0</value>
+<value>1.92141891864</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -2475,7 +2475,7 @@
 </variable>
 <variable class="Variable" id="beta_xs">
 <property name="Value">
-<value>0.0</value>
+<value>0.999331629965</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -2483,7 +2483,7 @@
 </variable>
 <variable class="Variable" id="tau_xs">
 <property name="Value">
-<value>0.0</value>
+<value>1.92013469981</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -2491,7 +2491,7 @@
 </variable>
 <variable class="Variable" id="Xs">
 <property name="Value">
-<value>0.0</value>
+<value>0</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -2625,7 +2625,7 @@
 </property>
 <variable class="Variable" id="P_kna">
 <property name="Value">
-<value>0.0</value>
+<value>0.03</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -2633,7 +2633,7 @@
 </variable>
 <variable class="Variable" id="E_Na">
 <property name="Value">
-<value>0.0</value>
+<value>66.5342893767</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -2641,7 +2641,7 @@
 </variable>
 <variable class="Variable" id="E_K">
 <property name="Value">
-<value>0.0</value>
+<value>-86.6334279933</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -2649,7 +2649,7 @@
 </variable>
 <variable class="Variable" id="E_Ks">
 <property name="Value">
-<value>0.0</value>
+<value>-71.3304225125</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -2657,7 +2657,7 @@
 </variable>
 <variable class="Variable" id="E_Ca">
 <property name="Value">
-<value>0.0</value>
+<value>123.021414146</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -2856,7 +2856,7 @@
 </property>
 <variable class="Variable" id="g_Kr">
 <property name="Value">
-<value>0.0</value>
+<value>0.096</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -2933,7 +2933,7 @@
 </property>
 <variable class="Variable" id="xr2_inf">
 <property name="Value">
-<value>0.0</value>
+<value>0.481258784121</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -2941,7 +2941,7 @@
 </variable>
 <variable class="Variable" id="alpha_xr2">
 <property name="Value">
-<value>0.0</value>
+<value>0.637460532368</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -2949,7 +2949,7 @@
 </variable>
 <variable class="Variable" id="beta_xr2">
 <property name="Value">
-<value>0.0</value>
+<value>1.11925142556</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -2957,7 +2957,7 @@
 </variable>
 <variable class="Variable" id="tau_xr2">
 <property name="Value">
-<value>0.0</value>
+<value>0.713478609591</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -2965,7 +2965,7 @@
 </variable>
 <variable class="Variable" id="Xr2">
 <property name="Value">
-<value>0.0</value>
+<value>1</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -3099,7 +3099,7 @@
 </property>
 <variable class="Variable" id="xr1_inf">
 <property name="Value">
-<value>0.0</value>
+<value>0.000184071904963</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -3107,7 +3107,7 @@
 </variable>
 <variable class="Variable" id="alpha_xr1">
 <property name="Value">
-<value>0.0</value>
+<value>7.19318175399</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -3115,7 +3115,7 @@
 </variable>
 <variable class="Variable" id="beta_xr1">
 <property name="Value">
-<value>0.0</value>
+<value>5.95507285427</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -3123,7 +3123,7 @@
 </variable>
 <variable class="Variable" id="tau_xr1">
 <property name="Value">
-<value>0.0</value>
+<value>42.835921399</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -3131,7 +3131,7 @@
 </variable>
 <variable class="Variable" id="Xr1">
 <property name="Value">
-<value>0.0</value>
+<value>0</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -3265,7 +3265,7 @@
 </property>
 <variable class="Variable" id="Na_o">
 <property name="Value">
-<value>0.0</value>
+<value>140</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -3273,7 +3273,7 @@
 </variable>
 <variable class="Variable" id="Na_i">
 <property name="Value">
-<value>0.0</value>
+<value>11.6</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -3347,7 +3347,7 @@
 </property>
 <variable class="Variable" id="g_pCa">
 <property name="Value">
-<value>0.0</value>
+<value>0.825</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -3355,7 +3355,7 @@
 </variable>
 <variable class="Variable" id="K_pCa">
 <property name="Value">
-<value>0.0</value>
+<value>0.0005</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -3363,7 +3363,7 @@
 </variable>
 <variable class="Variable" id="i_p_Ca">
 <property name="Value">
-<value>0.0</value>
+<value>0.235714285714</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -3417,7 +3417,7 @@
 </property>
 <variable class="Variable" id="Ca_SR">
 <property name="Value">
-<value>0.0</value>
+<value>0.2</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -3425,7 +3425,7 @@
 </variable>
 <variable class="Variable" id="i_rel">
 <property name="Value">
-<value>0.0</value>
+<value>0</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -3433,7 +3433,7 @@
 </variable>
 <variable class="Variable" id="i_up">
 <property name="Value">
-<value>0.0</value>
+<value>0.000165853658537</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -3441,7 +3441,7 @@
 </variable>
 <variable class="Variable" id="i_leak">
 <property name="Value">
-<value>0.0</value>
+<value>1.5984e-05</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -3449,7 +3449,7 @@
 </variable>
 <variable class="Variable" id="g">
 <property name="Value">
-<value>0.0</value>
+<value>1</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -3457,7 +3457,7 @@
 </variable>
 <variable class="Variable" id="tau_g">
 <property name="Value">
-<value>0.0</value>
+<value>2</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -3465,7 +3465,7 @@
 </variable>
 <variable class="Variable" id="g_inf">
 <property name="Value">
-<value>1.0</value>
+<value>0.96635590784</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -3473,7 +3473,7 @@
 </variable>
 <variable class="Variable" id="a_rel">
 <property name="Value">
-<value>0.0</value>
+<value>0.016464</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -3481,7 +3481,7 @@
 </variable>
 <variable class="Variable" id="b_rel">
 <property name="Value">
-<value>0.0</value>
+<value>0.25</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -3489,7 +3489,7 @@
 </variable>
 <variable class="Variable" id="c_rel">
 <property name="Value">
-<value>0.0</value>
+<value>0.008232</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -3497,7 +3497,7 @@
 </variable>
 <variable class="Variable" id="K_up">
 <property name="Value">
-<value>0.0</value>
+<value>0.00025</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -3505,7 +3505,7 @@
 </variable>
 <variable class="Variable" id="V_leak">
 <property name="Value">
-<value>0.0</value>
+<value>8e-5</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -3513,7 +3513,7 @@
 </variable>
 <variable class="Variable" id="Vmax_up">
 <property name="Value">
-<value>0.0</value>
+<value>0.000425</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -3521,7 +3521,7 @@
 </variable>
 <variable class="Variable" id="Ca_i_bufc">
 <property name="Value">
-<value>0.0</value>
+<value>0.0095087163233</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -3529,7 +3529,7 @@
 </variable>
 <variable class="Variable" id="Ca_sr_bufsr">
 <property name="Value">
-<value>0.0</value>
+<value>0.0769230769231</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -3537,7 +3537,7 @@
 </variable>
 <variable class="Variable" id="Buf_c">
 <property name="Value">
-<value>0.0</value>
+<value>0.15</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -3545,7 +3545,7 @@
 </variable>
 <variable class="Variable" id="K_buf_c">
 <property name="Value">
-<value>0.0</value>
+<value>0.001</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -3553,7 +3553,7 @@
 </variable>
 <variable class="Variable" id="Buf_sr">
 <property name="Value">
-<value>0.0</value>
+<value>10</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -3561,7 +3561,7 @@
 </variable>
 <variable class="Variable" id="K_buf_sr">
 <property name="Value">
-<value>0.0</value>
+<value>0.3</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -3569,7 +3569,7 @@
 </variable>
 <variable class="Variable" id="V_sr">
 <property name="Value">
-<value>0.0</value>
+<value>0.001094</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -3577,7 +3577,7 @@
 </variable>
 <variable class="Variable" id="d_g">
 <property name="Value">
-<value>0.0</value>
+<value>-0.0168220460799</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -3585,7 +3585,7 @@
 </variable>
 <variable class="Variable" id="Ca_o">
 <property name="Value">
-<value>0.0</value>
+<value>2</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -3593,7 +3593,7 @@
 </variable>
 <variable class="Variable" id="Ca_i">
 <property name="Value">
-<value>0.0</value>
+<value>0.0002</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -3977,7 +3977,7 @@
 </property>
 <variable class="Variable" id="K_o">
 <property name="Value">
-<value>0.0</value>
+<value>5.4</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -3985,7 +3985,7 @@
 </variable>
 <variable class="Variable" id="K_i">
 <property name="Value">
-<value>0.0</value>
+<value>138.3</value>
 </property>
 <property name="Name">
 <value>__none__</value>

@@ -27,7 +27,7 @@
 </property>
 <variable class="Variable" id="C">
 <property name="Value">
-<value>0.0</value>
+<value>0.01</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -91,7 +91,7 @@
 </property>
 <variable class="Variable" id="M">
 <property name="Value">
-<value>0.0</value>
+<value>0.01</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -155,7 +155,7 @@
 </property>
 <variable class="Variable" id="time">
 <property name="Value">
-<value>0.0</value>
+<value>0</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -179,7 +179,7 @@
 </property>
 <variable class="Variable" id="Kc">
 <property name="Value">
-<value>0.0</value>
+<value>0.5</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -187,7 +187,7 @@
 </variable>
 <variable class="Variable" id="VM1">
 <property name="Value">
-<value>0.0</value>
+<value>3</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -195,7 +195,7 @@
 </variable>
 <variable class="Variable" id="VM3">
 <property name="Value">
-<value>0.0</value>
+<value>1</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -203,7 +203,7 @@
 </variable>
 <variable class="Variable" id="kd">
 <property name="Value">
-<value>0.0</value>
+<value>0.01</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -211,7 +211,7 @@
 </variable>
 <variable class="Variable" id="Kd">
 <property name="Value">
-<value>0.0</value>
+<value>0.02</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -219,7 +219,7 @@
 </variable>
 <variable class="Variable" id="vi">
 <property name="Value">
-<value>0.0</value>
+<value>0.025</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -227,7 +227,7 @@
 </variable>
 <variable class="Variable" id="vd">
 <property name="Value">
-<value>0.0</value>
+<value>0.25</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -235,7 +235,7 @@
 </variable>
 <variable class="Variable" id="V1">
 <property name="Value">
-<value>0.0</value>
+<value>0.0588235294118</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -243,7 +243,7 @@
 </variable>
 <variable class="Variable" id="V2">
 <property name="Value">
-<value>0.0</value>
+<value>1.5</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -251,7 +251,7 @@
 </variable>
 <variable class="Variable" id="K1">
 <property name="Value">
-<value>0.0</value>
+<value>0.005</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -259,7 +259,7 @@
 </variable>
 <variable class="Variable" id="K2">
 <property name="Value">
-<value>0.0</value>
+<value>0.005</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -267,7 +267,7 @@
 </variable>
 <variable class="Variable" id="V3">
 <property name="Value">
-<value>0.0</value>
+<value>0.01</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -275,7 +275,7 @@
 </variable>
 <variable class="Variable" id="V4">
 <property name="Value">
-<value>0.0</value>
+<value>0.5</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -283,7 +283,7 @@
 </variable>
 <variable class="Variable" id="K3">
 <property name="Value">
-<value>0.0</value>
+<value>0.005</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -291,7 +291,7 @@
 </variable>
 <variable class="Variable" id="K4">
 <property name="Value">
-<value>0.0</value>
+<value>0.005</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -370,7 +370,7 @@
 </property>
 <variable class="Variable" id="X">
 <property name="Value">
-<value>0.0</value>
+<value>0.01</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -434,7 +434,7 @@
 </property>
 <variable class="Variable" id="X_star">
 <property name="Value">
-<value>0.0</value>
+<value>0.99</value>
 </property>
 <property name="Name">
 <value>__none__</value>
@@ -478,7 +478,7 @@
 </property>
 <variable class="Variable" id="M_star">
 <property name="Value">
-<value>0.0</value>
+<value>0.99</value>
 </property>
 <property name="Name">
 <value>__none__</value>

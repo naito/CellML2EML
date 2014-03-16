@@ -57,7 +57,7 @@ CELLML_MATH_NODE = 20
 import xml.etree.ElementTree as et
 from xml.etree.ElementTree import XMLParser
 
-import math
+from math import floor, ceil, factorial, exp, log, log10, sin, cos, tan, asin, acos, atan, sqrt, pow
 import numbers
 from copy import deepcopy
 
@@ -163,11 +163,12 @@ class CellML( object ):
 #        self._dump_connections()
 
         self._get_grobal_variables()
-        self._dump_grobal_variables()
+#        self._dump_grobal_variables()
 
         ##----初期値の計算-------------------------------------------------------------------------------
 
-        print 'initial value calc -- {0} times'.format( self._calc_initial_values() )
+        self._calc_initial_values()
+#        print '\ninitial value calc -- {0} round(s) invoked.\n'.format( self._calc_initial_values() )
         self._dump_grobal_variables()
 
     ##-------------------------------------------------------------------------------------------------
@@ -483,8 +484,14 @@ class CellML( object ):
         # va: variable_addressオブジェクト
         
         for gv in self.grobal_variables:
+            
+            if ( gv.component == va.component ) and ( gv.name == va.name ):
+#                print '        _get_grobal_variable_by_variable_address({0.component}:{0.name}) returns {1.component}:{1.name}'.format( va, gv )
+                return gv
+            
             for gv_va in gv.connection:
                 if self._is_same_variable_address( va, gv_va ):
+#                    print '        _get_grobal_variable_by_variable_address({0.component}:{0.name}) returns {1.component}:{1.name}'.format( va, gv )
                     return gv
         return None
 
@@ -517,8 +524,12 @@ class CellML( object ):
         
         gain = 0
         prev_gain = -1
+        round = 0
         
         while gain - prev_gain:
+            
+            round += 1
+#            print '\n_calc_initial_values(): ROUND {0}\n'.format( round )
             
             prev_gain = gain
             
@@ -546,7 +557,7 @@ class CellML( object ):
                     else:
                         gain += 1
         
-        return gain
+        return round
 
     ##-------------------------------------------------------------------------------------------------
     def _calc_initial_value( self, va ):
@@ -584,32 +595,52 @@ class CellML( object ):
         
 #        return 1.0
         
+        _value = None
+        
         if math.type != CELLML_MATH_ASSIGNMENT_EQUATION:
             raise TypeError, "_calc_math(): math.type must be assignment equation. ({0.component}:{0.name})".format( va )
         
         if   element.tag == math.tag[ 'cn' ]:
 #            print '_calc_math( {0.component}:{0.name} )  <cn>'.format( va )
-            return float( element.text )
+#            return float( element.text )
+            _value = element.text
         
         elif element.tag == math.tag[ 'ci' ]:
 #            print '_calc_math( {0.component}:{0.name} )  <ci>'.format( va )
-            _gv = self._get_grobal_variable_by_variable_address( self.variable_address( va.component, element.text ) )
-            if _gv.has_initial_value():
-#                print '    initial_value = {0.initial_value}'.format( _gv )
-                return float( _gv.initial_value )
-            else:
-                return None
+            
+            _value = self._get_grobal_variable_by_variable_address( self.variable_address( va.component, element.text ) ).initial_value
+            
+#            _gv = self._get_grobal_variable_by_variable_address( self.variable_address( va.component, element.text ) )
+#            if _gv.has_initial_value():
+##                print '    initial_value = {0.initial_value}'.format( _gv )
+##                return float( _gv.initial_value )
+#                print '    initial_value( {0.text} ) = {1}.'.format( element, _value )
+#                _value = float( _gv.initial_value )
+#            else:
+#                print '    initial_value( {0.text} ) not found.'.format( element )
+##                return None
+#                pass
             
         elif element.tag == math.tag[ 'apply' ]:
 #            print '_calc_math( {0.component}:{0.name} )  <apply>'.format( va )
-            return self._calc_math_apply( math, element, va )
+#            return self._calc_math_apply( math, element, va )
+            _value = self._calc_math_apply( math, element, va )
             
         elif element.tag == math.tag[ 'piecewise' ]:
 #            print '_calc_math( {0.component}:{0.name} )  <piecewise>'.format( va )
-            return self._calc_math_piecewise( math, element, va )
+#            return self._calc_math_piecewise( math, element, va )
+            _value = self._calc_math_piecewise( math, element, va )
         
         else:
             raise TypeError, "_calc_math(): element tag '{0._get_tag_without_namespace(0.root_node.tag)}' is not implemented.".format( math )
+        
+#        if element == math.right_side:
+#            print '_calc_math( {0.component}:{0.name} ) = {1}'.format( va, _value )
+        
+        if _value != None:
+            _value = float( _value )
+        
+        return _value
 
     ##-------------------------------------------------------------------------------------------------
     def _calc_math_apply( self, math, element, va ):
@@ -659,43 +690,43 @@ class CellML( object ):
                 return abs( children_values[ 0 ] )
             
             elif tag == math.tag[ 'floor' ]:
-                return math.floor( children_values[ 0 ] )
+                return floor( children_values[ 0 ] )
             
             elif tag == math.tag[ 'ceiling' ]:
-                return math.ceil( children_values[ 0 ] )
+                return ceil( children_values[ 0 ] )
             
             elif tag == math.tag[ 'factorial' ]:
-                return math.factorial( children_values[ 0 ] )
+                return factorial( children_values[ 0 ] )
             
             elif tag == math.tag[ 'exp' ]:
-                return math.exp( children_values[ 0 ] )
+                return exp( children_values[ 0 ] )
             
             elif tag == math.tag[ 'ln' ]:
-                return math.log( children_values[ 0 ] )
+                return log( children_values[ 0 ] )
             
             elif tag == math.tag[ 'log' ]:
-                return math.log10( children_values[ 0 ] )
+                return log10( children_values[ 0 ] )
             
             elif tag == math.tag[ 'sin' ]:
-                return math.sin( children_values[ 0 ] )
+                return sin( children_values[ 0 ] )
             
             elif tag == math.tag[ 'cos' ]:
-                return math.cos( children_values[ 0 ] )
+                return cos( children_values[ 0 ] )
             
             elif tag == math.tag[ 'tan' ]:
-                return math.tan( children_values[ 0 ] )
+                return tan( children_values[ 0 ] )
             
             elif tag == math.tag[ 'arcsin' ]:
-                return math.asin( children_values[ 0 ] )
+                return asin( children_values[ 0 ] )
             
             elif tag == math.tag[ 'arccos' ]:
-                return math.acos( children_values[ 0 ] )
+                return acos( children_values[ 0 ] )
             
             elif tag == math.tag[ 'arctan' ]:
-                return math.atan( children_values[ 0 ] )
+                return atan( children_values[ 0 ] )
             
             elif tag == math.tag[ 'root' ]:
-                return math.sqrt( children_values[ 0 ] )
+                return sqrt( children_values[ 0 ] )
 
 #            self.tag[ 'sec' ],
 #            self.tag[ 'csc' ],
@@ -726,10 +757,10 @@ class CellML( object ):
                 return 0
         
         elif tag == math.tag[ 'power' ]:
-            return math.pow( children_values[ 0 ], children_values[ 1 ] )
+            return pow( children_values[ 0 ], children_values[ 1 ] )
         
         elif tag == math.tag[ 'root' ]:
-            return math.pow( children_values[ 0 ], 1.0 / children_values[ 1 ] )
+            return pow( children_values[ 0 ], 1.0 / children_values[ 1 ] )
         
         # Nary nest function
         elif tag in math.tag_group[ 'nary_arith' ]:
@@ -779,12 +810,31 @@ class CellML( object ):
                 return 0
         
         else:
+            raise TypeError, "_calc_math_apply(): tag '{0}' not cought in {1.component}:{1.name}".format( tag, va )
             return None
 
 
     ##-------------------------------------------------------------------------------------------------
     def _calc_math_piecewise( self, math, element, va ):
-        return 1.0
+        
+#        return 1.0
+        
+        sub_elements = element.findall( './*' )
+        
+        for sub_element in sub_elements:
+            
+            if sub_element.tag == math.tag[ 'piece' ]:
+                
+                children = sub_element.findall( './*' )
+                
+                if self._calc_math( math, children.pop(), va ):
+                    return self._calc_math( math, children.pop(), va )
+            
+            elif sub_element.tag == math.tag[ 'otherwise' ]:
+                child = sub_element.findall( './*' )
+                return self._calc_math( math, child.pop(), va )
+            
+        return None
 
 
 ##=====================================================================================================

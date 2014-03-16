@@ -1,6 +1,6 @@
 
 # created by eml2em program
-# from file: tentusscher_noble_noble_panfilov_2004_a.eml, date: Sun Mar 16 01:03:34 2014
+# from file: tentusscher_noble_noble_panfilov_2004_a.eml, date: Sun Mar 16 15:52:15 2014
 #
 
 Stepper FixedODE1Stepper( ODE )
@@ -54,31 +54,31 @@ System System( /inward_rectifier_potassium_current )
 
 	Variable Variable( g_K1 )
 	{
-		Value	0.0;
+		Value	5.405;
 		Name	__none__;
 	}
 	
 	Variable Variable( xK1_inf )
 	{
-		Value	0.0;
+		Value	0.0497895286904;
 		Name	__none__;
 	}
 	
 	Variable Variable( alpha_K1 )
 	{
-		Value	0.0;
+		Value	0.0999993693947;
 		Name	__none__;
 	}
 	
 	Variable Variable( beta_K1 )
 	{
-		Value	0.0;
+		Value	1.90844240591;
 		Name	__none__;
 	}
 	
 	Variable Variable( i_K1 )
 	{
-		Value	0.0;
+		Value	0.116640848612;
 		Name	__none__;
 	}
 	
@@ -141,67 +141,67 @@ System System( /membrane )
 
 	Variable Variable( stim_start )
 	{
-		Value	0.0;
+		Value	10;
 		Name	__none__;
 	}
 	
 	Variable Variable( stim_period )
 	{
-		Value	0.0;
+		Value	1000;
 		Name	__none__;
 	}
 	
 	Variable Variable( stim_duration )
 	{
-		Value	0.0;
+		Value	1;
 		Name	__none__;
 	}
 	
 	Variable Variable( stim_amplitude )
 	{
-		Value	0.0;
+		Value	52;
 		Name	__none__;
 	}
 	
 	Variable Variable( R )
 	{
-		Value	0.0;
+		Value	8314.472;
 		Name	__none__;
 	}
 	
 	Variable Variable( T )
 	{
-		Value	0.0;
+		Value	310;
 		Name	__none__;
 	}
 	
 	Variable Variable( F )
 	{
-		Value	0.0;
+		Value	96485.3415;
 		Name	__none__;
 	}
 	
 	Variable Variable( V )
 	{
-		Value	0.0;
+		Value	-86.2;
 		Name	__none__;
 	}
 	
 	Variable Variable( V_c )
 	{
-		Value	0.0;
+		Value	0.016404;
 		Name	__none__;
 	}
 	
 	Variable Variable( Cm )
 	{
-		Value	0.0;
+		Value	0.185;
 		Name	__none__;
 	}
 	
 	Variable Variable( i_Stim )
 	{
-		Value	1.0;
+		Value	0.0;
 		Name	__none__;
 	}
 	
@@ -255,13 +255,13 @@ System System( /membrane/fast_sodium_current )
 
 	Variable Variable( g_Na )
 	{
-		Value	0.0;
+		Value	14.838;
 		Name	__none__;
 	}
 	
 	Variable Variable( i_Na )
 	{
-		Value	0.0;
+		Value	-0.0;
 		Name	__none__;
 	}
 	
@@ -295,31 +295,31 @@ System System( /membrane/fast_sodium_current/fast_sodium_current_m_gate )
 
 	Variable Variable( m_inf )
 	{
-		Value	0.0;
+		Value	0.0013955263216;
 		Name	__none__;
 	}
 	
 	Variable Variable( alpha_m )
 	{
-		Value	0.0;
+		Value	0.00527231222695;
 		Name	__none__;
 	}
 	
 	Variable Variable( beta_m )
 	{
-		Value	0.0;
+		Value	0.166392613891;
 		Name	__none__;
 	}
 	
 	Variable Variable( tau_m )
 	{
-		Value	0.0;
+		Value	0.000877273812692;
 		Name	__none__;
 	}
 	
 	Variable Variable( m )
 	{
-		Value	0.0;
+		Value	0;
 		Name	__none__;
 	}
 	
@@ -386,31 +386,31 @@ System System( /membrane/fast_sodium_current/fast_sodium_current_j_gate )
 
 	Variable Variable( j_inf )
 	{
-		Value	0.0;
+		Value	0.770528409604;
 		Name	__none__;
 	}
 	
 	Variable Variable( alpha_j )
 	{
-		Value	1.0;
+		Value	13293.8030299;
 		Name	__none__;
 	}
 	
 	Variable Variable( beta_j )
 	{
-		Value	1.0;
+		Value	0.0001049795004;
 		Name	__none__;
 	}
 	
 	Variable Variable( tau_j )
 	{
-		Value	0.5;
+		Value	7.52230185637e-05;
 		Name	__none__;
 	}
 	
 	Variable Variable( j )
 	{
-		Value	0.0;
+		Value	0.75;
 		Name	__none__;
 	}
 	
@@ -477,31 +477,31 @@ System System( /membrane/fast_sodium_current/fast_sodium_current_h_gate )
 
 	Variable Variable( h_inf )
 	{
-		Value	0.0;
+		Value	0.770528409604;
 		Name	__none__;
 	}
 	
 	Variable Variable( alpha_h )
 	{
-		Value	1.0;
+		Value	0.141856498647;
 		Name	__none__;
 	}
 	
 	Variable Variable( beta_h )
 	{
-		Value	1.0;
+		Value	0.00297789419528;
 		Name	__none__;
 	}
 	
 	Variable Variable( tau_h )
 	{
-		Value	0.5;
+		Value	6.90443740867;
 		Name	__none__;
 	}
 	
 	Variable Variable( h )
 	{
-		Value	0.0;
+		Value	0.75;
 		Name	__none__;
 	}
 	
@@ -568,7 +568,7 @@ System System( /membrane/transient_outward_current )
 
 	Variable Variable( g_to )
 	{
-		Value	0.0;
+		Value	0.294;
 		Name	__none__;
 	}
 	
@@ -607,19 +607,19 @@ System System( /membrane/transient_outward_current/transient_outward_current_s_g
 
 	Variable Variable( s_inf )
 	{
-		Value	0.0;
+		Value	0.999998221965;
 		Name	__none__;
 	}
 	
 	Variable Variable( tau_s )
 	{
-		Value	0.0;
+		Value	8.42238048389;
 		Name	__none__;
 	}
 	
 	Variable Variable( s )
 	{
-		Value	0.0;
+		Value	1;
 		Name	__none__;
 	}
 	
@@ -667,19 +667,19 @@ System System( /membrane/transient_outward_current/transient_outward_current_r_g
 
 	Variable Variable( r_inf )
 	{
-		Value	0.0;
+		Value	2.0558321875e-08;
 		Name	__none__;
 	}
 	
 	Variable Variable( tau_r )
 	{
-		Value	0.0;
+		Value	3.70226596349;
 		Name	__none__;
 	}
 	
 	Variable Variable( r )
 	{
-		Value	0.0;
+		Value	0;
 		Name	__none__;
 	}
 	
@@ -727,43 +727,43 @@ System System( /membrane/sodium_calcium_exchanger_current )
 
 	Variable Variable( K_NaCa )
 	{
-		Value	0.0;
+		Value	1000;
 		Name	__none__;
 	}
 	
 	Variable Variable( K_sat )
 	{
-		Value	0.0;
+		Value	0.1;
 		Name	__none__;
 	}
 	
 	Variable Variable( alpha )
 	{
-		Value	0.0;
+		Value	2.5;
 		Name	__none__;
 	}
 	
 	Variable Variable( gamma )
 	{
-		Value	0.0;
+		Value	0.35;
 		Name	__none__;
 	}
 	
 	Variable Variable( Km_Ca )
 	{
-		Value	0.0;
+		Value	1.38;
 		Name	__none__;
 	}
 	
 	Variable Variable( Km_Nai )
 	{
-		Value	0.0;
+		Value	87.5;
 		Name	__none__;
 	}
 	
 	Variable Variable( i_NaCa )
 	{
-		Value	0.0;
+		Value	-0.485536753407;
 		Name	__none__;
 	}
 	
@@ -805,13 +805,13 @@ System System( /membrane/calcium_background_current )
 
 	Variable Variable( g_bca )
 	{
-		Value	0.0;
+		Value	0.000592;
 		Name	__none__;
 	}
 	
 	Variable Variable( i_b_Ca )
 	{
-		Value	0.0;
+		Value	-0.123859077174;
 		Name	__none__;
 	}
 	
@@ -842,25 +842,25 @@ System System( /membrane/sodium_potassium_pump_current )
 
 	Variable Variable( P_NaK )
 	{
-		Value	0.0;
+		Value	1.362;
 		Name	__none__;
 	}
 	
 	Variable Variable( K_mk )
 	{
-		Value	0.0;
+		Value	1;
 		Name	__none__;
 	}
 	
 	Variable Variable( K_mNa )
 	{
-		Value	0.0;
+		Value	40;
 		Name	__none__;
 	}
 	
 	Variable Variable( i_NaK )
 	{
-		Value	0.0;
+		Value	0.125322662069;
 		Name	__none__;
 	}
 	
@@ -897,13 +897,13 @@ System System( /membrane/potassium_pump_current )
 
 	Variable Variable( g_pK )
 	{
-		Value	0.0;
+		Value	0.0146;
 		Name	__none__;
 	}
 	
 	Variable Variable( i_p_K )
 	{
-		Value	0.0;
+		Value	5.31405361398e-11;
 		Name	__none__;
 	}
 	
@@ -934,19 +934,19 @@ System System( /membrane/L_type_Ca_current )
 
 	Variable Variable( g_CaL )
 	{
-		Value	0.0;
+		Value	0.000175;
 		Name	__none__;
 	}
 	
 	Variable Variable( i_CaL )
 	{
-		Value	0.0;
+		Value	__UNDEFINED__;
 		Name	__none__;
 	}
 	
 	Variable Variable( d )
 	{
-		Value	0.0;
+		Value	__UNDEFINED__;
 		Name	__none__;
 	}
 	
@@ -984,19 +984,19 @@ System System( /membrane/L_type_Ca_current/L_type_Ca_current_f_gate )
 
 	Variable Variable( f_inf )
 	{
-		Value	0.0;
+		Value	0.999921876604;
 		Name	__none__;
 	}
 	
 	Variable Variable( tau_f )
 	{
-		Value	0.0;
+		Value	80.0029561514;
 		Name	__none__;
 	}
 	
 	Variable Variable( f )
 	{
-		Value	0.0;
+		Value	1;
 		Name	__none__;
 	}
 	
@@ -1044,31 +1044,31 @@ System System( /membrane/L_type_Ca_current/L_type_Ca_current_d_gate )
 
 	Variable Variable( d_inf )
 	{
-		Value	0.0;
+		Value	1.98623112461e-05;
 		Name	__none__;
 	}
 	
 	Variable Variable( alpha_d )
 	{
-		Value	0.0;
+		Value	0.276748411555;
 		Name	__none__;
 	}
 	
 	Variable Variable( beta_d )
 	{
-		Value	0.0;
+		Value	1.39999987607;
 		Name	__none__;
 	}
 	
 	Variable Variable( gamma_d )
 	{
-		Value	0.0;
+		Value	0.00110147830765;
 		Name	__none__;
 	}
 	
 	Variable Variable( tau_d )
 	{
-		Value	0.0;
+		Value	0.388549220187;
 		Name	__none__;
 	}
 	
@@ -1145,25 +1145,25 @@ System System( /membrane/L_type_Ca_current/L_type_Ca_current_fCa_gate )
 
 	Variable Variable( alpha_fCa )
 	{
-		Value	0.0;
+		Value	0.979847380122;
 		Name	__none__;
 	}
 	
 	Variable Variable( beta_fCa )
 	{
-		Value	0.0;
+		Value	0.0952574126822;
 		Name	__none__;
 	}
 	
 	Variable Variable( gama_fCa )
 	{
-		Value	0.0;
+		Value	0.133082111749;
 		Name	__none__;
 	}
 	
 	Variable Variable( fCa_inf )
 	{
-		Value	0.0;
+		Value	0.985059523667;
 		Name	__none__;
 	}
 	
@@ -1175,13 +1175,13 @@ System System( /membrane/L_type_Ca_current/L_type_Ca_current_fCa_gate )
 	
 	Variable Variable( d_fCa )
 	{
-		Value	0.0;
+		Value	-0.00747023816666;
 		Name	__none__;
 	}
 	
 	Variable Variable( fCa )
 	{
-		Value	0.0;
+		Value	1;
 		Name	__none__;
 	}
 	
@@ -1269,13 +1269,13 @@ System System( /membrane/sodium_background_current )
 
 	Variable Variable( g_bna )
 	{
-		Value	0.0;
+		Value	0.00029;
 		Name	__none__;
 	}
 	
 	Variable Variable( i_b_Na )
 	{
-		Value	0.0;
+		Value	-0.0442929439192;
 		Name	__none__;
 	}
 	
@@ -1306,13 +1306,13 @@ System System( /membrane/slow_time_dependent_potassium_current )
 
 	Variable Variable( g_Ks )
 	{
-		Value	0.0;
+		Value	0.062;
 		Name	__none__;
 	}
 	
 	Variable Variable( i_Ks )
 	{
-		Value	0.0;
+		Value	-0.0;
 		Name	__none__;
 	}
 	
@@ -1344,31 +1344,31 @@ System System( /membrane/slow_time_dependent_potassium_current/slow_time_depende
 
 	Variable Variable( xs_inf )
 	{
-		Value	0.0;
+		Value	0.00301841632471;
 		Name	__none__;
 	}
 	
 	Variable Variable( alpha_xs )
 	{
-		Value	0.0;
+		Value	1.92141891864;
 		Name	__none__;
 	}
 	
 	Variable Variable( beta_xs )
 	{
-		Value	0.0;
+		Value	0.999331629965;
 		Name	__none__;
 	}
 	
 	Variable Variable( tau_xs )
 	{
-		Value	0.0;
+		Value	1.92013469981;
 		Name	__none__;
 	}
 	
 	Variable Variable( Xs )
 	{
-		Value	0.0;
+		Value	0;
 		Name	__none__;
 	}
 	
@@ -1435,31 +1435,31 @@ System System( /membrane/reversal_potentials )
 
 	Variable Variable( P_kna )
 	{
-		Value	0.0;
+		Value	0.03;
 		Name	__none__;
 	}
 	
 	Variable Variable( E_Na )
 	{
-		Value	0.0;
+		Value	66.5342893767;
 		Name	__none__;
 	}
 	
 	Variable Variable( E_K )
 	{
-		Value	0.0;
+		Value	-86.6334279933;
 		Name	__none__;
 	}
 	
 	Variable Variable( E_Ks )
 	{
-		Value	0.0;
+		Value	-71.3304225125;
 		Name	__none__;
 	}
 	
 	Variable Variable( E_Ca )
 	{
-		Value	0.0;
+		Value	123.021414146;
 		Name	__none__;
 	}
 	
@@ -1534,7 +1534,7 @@ System System( /membrane/rapid_time_dependent_potassium_current )
 
 	Variable Variable( g_Kr )
 	{
-		Value	0.0;
+		Value	0.096;
 		Name	__none__;
 	}
 	
@@ -1574,31 +1574,31 @@ System System( /membrane/rapid_time_dependent_potassium_current/rapid_time_depen
 
 	Variable Variable( xr2_inf )
 	{
-		Value	0.0;
+		Value	0.481258784121;
 		Name	__none__;
 	}
 	
 	Variable Variable( alpha_xr2 )
 	{
-		Value	0.0;
+		Value	0.637460532368;
 		Name	__none__;
 	}
 	
 	Variable Variable( beta_xr2 )
 	{
-		Value	0.0;
+		Value	1.11925142556;
 		Name	__none__;
 	}
 	
 	Variable Variable( tau_xr2 )
 	{
-		Value	0.0;
+		Value	0.713478609591;
 		Name	__none__;
 	}
 	
 	Variable Variable( Xr2 )
 	{
-		Value	0.0;
+		Value	1;
 		Name	__none__;
 	}
 	
@@ -1665,31 +1665,31 @@ System System( /membrane/rapid_time_dependent_potassium_current/rapid_time_depen
 
 	Variable Variable( xr1_inf )
 	{
-		Value	0.0;
+		Value	0.000184071904963;
 		Name	__none__;
 	}
 	
 	Variable Variable( alpha_xr1 )
 	{
-		Value	0.0;
+		Value	7.19318175399;
 		Name	__none__;
 	}
 	
 	Variable Variable( beta_xr1 )
 	{
-		Value	0.0;
+		Value	5.95507285427;
 		Name	__none__;
 	}
 	
 	Variable Variable( tau_xr1 )
 	{
-		Value	0.0;
+		Value	42.835921399;
 		Name	__none__;
 	}
 	
 	Variable Variable( Xr1 )
 	{
-		Value	0.0;
+		Value	0;
 		Name	__none__;
 	}
 	
@@ -1756,13 +1756,13 @@ System System( /membrane/sodium_dynamics )
 
 	Variable Variable( Na_o )
 	{
-		Value	0.0;
+		Value	140;
 		Name	__none__;
 	}
 	
 	Variable Variable( Na_i )
 	{
-		Value	0.0;
+		Value	11.6;
 		Name	__none__;
 	}
 	
@@ -1797,19 +1797,19 @@ System System( /membrane/calcium_pump_current )
 
 	Variable Variable( g_pCa )
 	{
-		Value	0.0;
+		Value	0.825;
 		Name	__none__;
 	}
 	
 	Variable Variable( K_pCa )
 	{
-		Value	0.0;
+		Value	0.0005;
 		Name	__none__;
 	}
 	
 	Variable Variable( i_p_Ca )
 	{
-		Value	0.0;
+		Value	0.235714285714;
 		Name	__none__;
 	}
 	
@@ -1840,139 +1840,139 @@ System System( /membrane/calcium_dynamics )
 
 	Variable Variable( Ca_SR )
 	{
-		Value	0.0;
+		Value	0.2;
 		Name	__none__;
 	}
 	
 	Variable Variable( i_rel )
 	{
-		Value	0.0;
+		Value	__UNDEFINED__;
 		Name	__none__;
 	}
 	
 	Variable Variable( i_up )
 	{
-		Value	0.0;
+		Value	0.000165853658537;
 		Name	__none__;
 	}
 	
 	Variable Variable( i_leak )
 	{
-		Value	0.0;
+		Value	1.5984e-05;
 		Name	__none__;
 	}
 	
 	Variable Variable( g )
 	{
-		Value	0.0;
+		Value	1;
 		Name	__none__;
 	}
 	
 	Variable Variable( tau_g )
 	{
-		Value	0.0;
+		Value	2;
 		Name	__none__;
 	}
 	
 	Variable Variable( g_inf )
 	{
-		Value	1.0;
+		Value	0.96635590784;
 		Name	__none__;
 	}
 	
 	Variable Variable( a_rel )
 	{
-		Value	0.0;
+		Value	0.016464;
 		Name	__none__;
 	}
 	
 	Variable Variable( b_rel )
 	{
-		Value	0.0;
+		Value	0.25;
 		Name	__none__;
 	}
 	
 	Variable Variable( c_rel )
 	{
-		Value	0.0;
+		Value	0.008232;
 		Name	__none__;
 	}
 	
 	Variable Variable( K_up )
 	{
-		Value	0.0;
+		Value	0.00025;
 		Name	__none__;
 	}
 	
 	Variable Variable( V_leak )
 	{
-		Value	0.0;
+		Value	8e-5;
 		Name	__none__;
 	}
 	
 	Variable Variable( Vmax_up )
 	{
-		Value	0.0;
+		Value	0.000425;
 		Name	__none__;
 	}
 	
 	Variable Variable( Ca_i_bufc )
 	{
-		Value	0.0;
+		Value	0.0095087163233;
 		Name	__none__;
 	}
 	
 	Variable Variable( Ca_sr_bufsr )
 	{
-		Value	0.0;
+		Value	0.0769230769231;
 		Name	__none__;
 	}
 	
 	Variable Variable( Buf_c )
 	{
-		Value	0.0;
+		Value	0.15;
 		Name	__none__;
 	}
 	
 	Variable Variable( K_buf_c )
 	{
-		Value	0.0;
+		Value	0.001;
 		Name	__none__;
 	}
 	
 	Variable Variable( Buf_sr )
 	{
-		Value	0.0;
+		Value	10;
 		Name	__none__;
 	}
 	
 	Variable Variable( K_buf_sr )
 	{
-		Value	0.0;
+		Value	0.3;
 		Name	__none__;
 	}
 	
 	Variable Variable( V_sr )
 	{
-		Value	0.0;
+		Value	0.001094;
 		Name	__none__;
 	}
 	
 	Variable Variable( d_g )
 	{
-		Value	0.0;
+		Value	-0.0168220460799;
 		Name	__none__;
 	}
 	
 	Variable Variable( Ca_o )
 	{
-		Value	0.0;
+		Value	2;
 		Name	__none__;
 	}
 	
 	Variable Variable( Ca_i )
 	{
-		Value	0.0;
+		Value	0.0002;
 		Name	__none__;
 	}
 	
@@ -2114,13 +2114,13 @@ System System( /membrane/potassium_dynamics )
 
 	Variable Variable( K_o )
 	{
-		Value	0.0;
+		Value	5.4;
 		Name	__none__;
 	}
 	
 	Variable Variable( K_i )
 	{
-		Value	0.0;
+		Value	138.3;
 		Name	__none__;
 	}
 	
