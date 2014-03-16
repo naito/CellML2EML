@@ -1,0 +1,753 @@
+<?xml version="1.0" ?>
+<eml>
+<stepper class="FixedODE1Stepper" id="ODE"/>
+<stepper class="DiscreteTimeStepper" id="DT"/>
+<system class="System" id="/">
+<property name="Name">
+<value>__none__</value>
+</property>
+<property name="StepperID">
+<value>ODE</value>
+</property>
+<variable class="Variable" id="SIZE">
+<property name="Value">
+<value>1.0</value>
+</property>
+<property name="Name">
+<value>__none__</value>
+</property>
+</variable>
+</system>
+<system class="System" id="/environment">
+<property name="Name">
+<value>__none__</value>
+</property>
+<property name="StepperID">
+<value>ODE</value>
+</property>
+<variable class="Variable" id="time">
+<property name="Value">
+<value>0.0</value>
+</property>
+<property name="Name">
+<value>__none__</value>
+</property>
+</variable>
+<variable class="Variable" id="SIZE">
+<property name="Value">
+<value>1.0</value>
+</property>
+<property name="Name">
+<value>__none__</value>
+</property>
+</variable>
+</system>
+<system class="System" id="/membrane">
+<property name="Name">
+<value>__none__</value>
+</property>
+<property name="StepperID">
+<value>ODE</value>
+</property>
+<variable class="Variable" id="Cm">
+<property name="Value">
+<value>0.0</value>
+</property>
+<property name="Name">
+<value>__none__</value>
+</property>
+</variable>
+<variable class="Variable" id="i_Stim">
+<property name="Value">
+<value>1.0</value>
+</property>
+<property name="Name">
+<value>__none__</value>
+</property>
+</variable>
+<variable class="Variable" id="V">
+<property name="Value">
+<value>0.0</value>
+</property>
+<property name="Name">
+<value>__none__</value>
+</property>
+</variable>
+<variable class="Variable" id="E_R">
+<property name="Value">
+<value>0.0</value>
+</property>
+<property name="Name">
+<value>__none__</value>
+</property>
+</variable>
+<variable class="Variable" id="SIZE">
+<property name="Value">
+<value>1.0</value>
+</property>
+<property name="Name">
+<value>__none__</value>
+</property>
+</variable>
+<process class="ExpressionAssignmentProcess" id="i_Stim">
+<property name="Name">
+<value>__none__</value>
+</property>
+<property name="Expression">
+<value>piecewise( 20, and( geq( time.Value, 10 ), leq( time.Value, 10.5 ) ), 0 )</value>
+</property>
+<property name="VariableReferenceList">
+<value>
+<value>time</value>
+<value>:/environment:time</value>
+<value>0</value>
+</value>
+<value>
+<value>i_Stim</value>
+<value>:/membrane:i_Stim</value>
+<value>1</value>
+</value>
+</property>
+</process>
+<process class="ExpressionFluxProcess" id="V">
+<property name="Name">
+<value>__none__</value>
+</property>
+<property name="Expression">
+<value>-( -i_Stim.Value + i_Na.Value + i_K.Value + i_L.Value ) / Cm.Value</value>
+</property>
+<property name="VariableReferenceList">
+<value>
+<value>V</value>
+<value>:/membrane:V</value>
+<value>1</value>
+</value>
+<value>
+<value>Cm</value>
+<value>:/membrane:Cm</value>
+<value>0</value>
+</value>
+<value>
+<value>i_Na</value>
+<value>:/membrane/sodium_channel:i_Na</value>
+<value>0</value>
+</value>
+<value>
+<value>i_K</value>
+<value>:/membrane/potassium_channel:i_K</value>
+<value>0</value>
+</value>
+<value>
+<value>i_L</value>
+<value>:/membrane/leakage_current:i_L</value>
+<value>0</value>
+</value>
+<value>
+<value>i_Stim</value>
+<value>:/membrane:i_Stim</value>
+<value>0</value>
+</value>
+</property>
+</process>
+</system>
+<system class="System" id="/membrane/sodium_channel">
+<property name="Name">
+<value>__none__</value>
+</property>
+<property name="StepperID">
+<value>ODE</value>
+</property>
+<variable class="Variable" id="g_Na">
+<property name="Value">
+<value>0.0</value>
+</property>
+<property name="Name">
+<value>__none__</value>
+</property>
+</variable>
+<variable class="Variable" id="E_Na">
+<property name="Value">
+<value>0.0</value>
+</property>
+<property name="Name">
+<value>__none__</value>
+</property>
+</variable>
+<variable class="Variable" id="i_Na">
+<property name="Value">
+<value>0.0</value>
+</property>
+<property name="Name">
+<value>__none__</value>
+</property>
+</variable>
+<variable class="Variable" id="SIZE">
+<property name="Value">
+<value>1.0</value>
+</property>
+<property name="Name">
+<value>__none__</value>
+</property>
+</variable>
+<process class="ExpressionAssignmentProcess" id="E_Na">
+<property name="Name">
+<value>__none__</value>
+</property>
+<property name="Expression">
+<value>E_R.Value + 115</value>
+</property>
+<property name="VariableReferenceList">
+<value>
+<value>E_Na</value>
+<value>:/membrane/sodium_channel:E_Na</value>
+<value>1</value>
+</value>
+<value>
+<value>E_R</value>
+<value>:/membrane:E_R</value>
+<value>0</value>
+</value>
+</property>
+</process>
+<process class="ExpressionAssignmentProcess" id="i_Na">
+<property name="Name">
+<value>__none__</value>
+</property>
+<property name="Expression">
+<value>g_Na.Value * pow( m.Value, 3 ) * h.Value * ( V.Value - E_Na.Value )</value>
+</property>
+<property name="VariableReferenceList">
+<value>
+<value>i_Na</value>
+<value>:/membrane/sodium_channel:i_Na</value>
+<value>1</value>
+</value>
+<value>
+<value>g_Na</value>
+<value>:/membrane/sodium_channel:g_Na</value>
+<value>0</value>
+</value>
+<value>
+<value>E_Na</value>
+<value>:/membrane/sodium_channel:E_Na</value>
+<value>0</value>
+</value>
+<value>
+<value>V</value>
+<value>:/membrane:V</value>
+<value>0</value>
+</value>
+<value>
+<value>m</value>
+<value>:/membrane/sodium_channel/sodium_channel_m_gate:m</value>
+<value>0</value>
+</value>
+<value>
+<value>h</value>
+<value>:/membrane/sodium_channel/sodium_channel_h_gate:h</value>
+<value>0</value>
+</value>
+</property>
+</process>
+</system>
+<system class="System" id="/membrane/sodium_channel/sodium_channel_m_gate">
+<property name="Name">
+<value>__none__</value>
+</property>
+<property name="StepperID">
+<value>ODE</value>
+</property>
+<variable class="Variable" id="alpha_m">
+<property name="Value">
+<value>0.0</value>
+</property>
+<property name="Name">
+<value>__none__</value>
+</property>
+</variable>
+<variable class="Variable" id="beta_m">
+<property name="Value">
+<value>0.0</value>
+</property>
+<property name="Name">
+<value>__none__</value>
+</property>
+</variable>
+<variable class="Variable" id="m">
+<property name="Value">
+<value>0.0</value>
+</property>
+<property name="Name">
+<value>__none__</value>
+</property>
+</variable>
+<variable class="Variable" id="SIZE">
+<property name="Value">
+<value>1.0</value>
+</property>
+<property name="Name">
+<value>__none__</value>
+</property>
+</variable>
+<process class="ExpressionAssignmentProcess" id="alpha_m">
+<property name="Name">
+<value>__none__</value>
+</property>
+<property name="Expression">
+<value>-0.1 * ( V.Value + 50 ) / ( exp( -( V.Value + 50 ) / 10 ) - 1 )</value>
+</property>
+<property name="VariableReferenceList">
+<value>
+<value>alpha_m</value>
+<value>:/membrane/sodium_channel/sodium_channel_m_gate:alpha_m</value>
+<value>1</value>
+</value>
+<value>
+<value>V</value>
+<value>:/membrane:V</value>
+<value>0</value>
+</value>
+</property>
+</process>
+<process class="ExpressionAssignmentProcess" id="beta_m">
+<property name="Name">
+<value>__none__</value>
+</property>
+<property name="Expression">
+<value>4 * exp( -( V.Value + 75 ) / 18 )</value>
+</property>
+<property name="VariableReferenceList">
+<value>
+<value>beta_m</value>
+<value>:/membrane/sodium_channel/sodium_channel_m_gate:beta_m</value>
+<value>1</value>
+</value>
+<value>
+<value>V</value>
+<value>:/membrane:V</value>
+<value>0</value>
+</value>
+</property>
+</process>
+<process class="ExpressionFluxProcess" id="m">
+<property name="Name">
+<value>__none__</value>
+</property>
+<property name="Expression">
+<value>alpha_m.Value * ( 1 - m.Value ) - beta_m.Value * m.Value</value>
+</property>
+<property name="VariableReferenceList">
+<value>
+<value>m</value>
+<value>:/membrane/sodium_channel/sodium_channel_m_gate:m</value>
+<value>1</value>
+</value>
+<value>
+<value>alpha_m</value>
+<value>:/membrane/sodium_channel/sodium_channel_m_gate:alpha_m</value>
+<value>0</value>
+</value>
+<value>
+<value>beta_m</value>
+<value>:/membrane/sodium_channel/sodium_channel_m_gate:beta_m</value>
+<value>0</value>
+</value>
+</property>
+</process>
+</system>
+<system class="System" id="/membrane/sodium_channel/sodium_channel_h_gate">
+<property name="Name">
+<value>__none__</value>
+</property>
+<property name="StepperID">
+<value>ODE</value>
+</property>
+<variable class="Variable" id="alpha_h">
+<property name="Value">
+<value>0.0</value>
+</property>
+<property name="Name">
+<value>__none__</value>
+</property>
+</variable>
+<variable class="Variable" id="beta_h">
+<property name="Value">
+<value>0.0</value>
+</property>
+<property name="Name">
+<value>__none__</value>
+</property>
+</variable>
+<variable class="Variable" id="h">
+<property name="Value">
+<value>0.0</value>
+</property>
+<property name="Name">
+<value>__none__</value>
+</property>
+</variable>
+<variable class="Variable" id="SIZE">
+<property name="Value">
+<value>1.0</value>
+</property>
+<property name="Name">
+<value>__none__</value>
+</property>
+</variable>
+<process class="ExpressionAssignmentProcess" id="alpha_h">
+<property name="Name">
+<value>__none__</value>
+</property>
+<property name="Expression">
+<value>0.07 * exp( -( V.Value + 75 ) / 20 )</value>
+</property>
+<property name="VariableReferenceList">
+<value>
+<value>alpha_h</value>
+<value>:/membrane/sodium_channel/sodium_channel_h_gate:alpha_h</value>
+<value>1</value>
+</value>
+<value>
+<value>V</value>
+<value>:/membrane:V</value>
+<value>0</value>
+</value>
+</property>
+</process>
+<process class="ExpressionAssignmentProcess" id="beta_h">
+<property name="Name">
+<value>__none__</value>
+</property>
+<property name="Expression">
+<value>1 / ( exp( -( V.Value + 45 ) / 10 ) + 1 )</value>
+</property>
+<property name="VariableReferenceList">
+<value>
+<value>beta_h</value>
+<value>:/membrane/sodium_channel/sodium_channel_h_gate:beta_h</value>
+<value>1</value>
+</value>
+<value>
+<value>V</value>
+<value>:/membrane:V</value>
+<value>0</value>
+</value>
+</property>
+</process>
+<process class="ExpressionFluxProcess" id="h">
+<property name="Name">
+<value>__none__</value>
+</property>
+<property name="Expression">
+<value>alpha_h.Value * ( 1 - h.Value ) - beta_h.Value * h.Value</value>
+</property>
+<property name="VariableReferenceList">
+<value>
+<value>h</value>
+<value>:/membrane/sodium_channel/sodium_channel_h_gate:h</value>
+<value>1</value>
+</value>
+<value>
+<value>alpha_h</value>
+<value>:/membrane/sodium_channel/sodium_channel_h_gate:alpha_h</value>
+<value>0</value>
+</value>
+<value>
+<value>beta_h</value>
+<value>:/membrane/sodium_channel/sodium_channel_h_gate:beta_h</value>
+<value>0</value>
+</value>
+</property>
+</process>
+</system>
+<system class="System" id="/membrane/leakage_current">
+<property name="Name">
+<value>__none__</value>
+</property>
+<property name="StepperID">
+<value>ODE</value>
+</property>
+<variable class="Variable" id="g_L">
+<property name="Value">
+<value>0.0</value>
+</property>
+<property name="Name">
+<value>__none__</value>
+</property>
+</variable>
+<variable class="Variable" id="E_L">
+<property name="Value">
+<value>0.0</value>
+</property>
+<property name="Name">
+<value>__none__</value>
+</property>
+</variable>
+<variable class="Variable" id="i_L">
+<property name="Value">
+<value>0.0</value>
+</property>
+<property name="Name">
+<value>__none__</value>
+</property>
+</variable>
+<variable class="Variable" id="SIZE">
+<property name="Value">
+<value>1.0</value>
+</property>
+<property name="Name">
+<value>__none__</value>
+</property>
+</variable>
+<process class="ExpressionAssignmentProcess" id="E_L">
+<property name="Name">
+<value>__none__</value>
+</property>
+<property name="Expression">
+<value>E_R.Value + 10.613</value>
+</property>
+<property name="VariableReferenceList">
+<value>
+<value>E_L</value>
+<value>:/membrane/leakage_current:E_L</value>
+<value>1</value>
+</value>
+<value>
+<value>E_R</value>
+<value>:/membrane:E_R</value>
+<value>0</value>
+</value>
+</property>
+</process>
+<process class="ExpressionAssignmentProcess" id="i_L">
+<property name="Name">
+<value>__none__</value>
+</property>
+<property name="Expression">
+<value>g_L.Value * ( V.Value - E_L.Value )</value>
+</property>
+<property name="VariableReferenceList">
+<value>
+<value>i_L</value>
+<value>:/membrane/leakage_current:i_L</value>
+<value>1</value>
+</value>
+<value>
+<value>g_L</value>
+<value>:/membrane/leakage_current:g_L</value>
+<value>0</value>
+</value>
+<value>
+<value>E_L</value>
+<value>:/membrane/leakage_current:E_L</value>
+<value>0</value>
+</value>
+<value>
+<value>V</value>
+<value>:/membrane:V</value>
+<value>0</value>
+</value>
+</property>
+</process>
+</system>
+<system class="System" id="/membrane/potassium_channel">
+<property name="Name">
+<value>__none__</value>
+</property>
+<property name="StepperID">
+<value>ODE</value>
+</property>
+<variable class="Variable" id="g_K">
+<property name="Value">
+<value>0.0</value>
+</property>
+<property name="Name">
+<value>__none__</value>
+</property>
+</variable>
+<variable class="Variable" id="E_K">
+<property name="Value">
+<value>0.0</value>
+</property>
+<property name="Name">
+<value>__none__</value>
+</property>
+</variable>
+<variable class="Variable" id="i_K">
+<property name="Value">
+<value>0.0</value>
+</property>
+<property name="Name">
+<value>__none__</value>
+</property>
+</variable>
+<variable class="Variable" id="SIZE">
+<property name="Value">
+<value>1.0</value>
+</property>
+<property name="Name">
+<value>__none__</value>
+</property>
+</variable>
+<process class="ExpressionAssignmentProcess" id="E_K">
+<property name="Name">
+<value>__none__</value>
+</property>
+<property name="Expression">
+<value>E_R.Value - 12</value>
+</property>
+<property name="VariableReferenceList">
+<value>
+<value>E_K</value>
+<value>:/membrane/potassium_channel:E_K</value>
+<value>1</value>
+</value>
+<value>
+<value>E_R</value>
+<value>:/membrane:E_R</value>
+<value>0</value>
+</value>
+</property>
+</process>
+<process class="ExpressionAssignmentProcess" id="i_K">
+<property name="Name">
+<value>__none__</value>
+</property>
+<property name="Expression">
+<value>g_K.Value * pow( n.Value, 4 ) * ( V.Value - E_K.Value )</value>
+</property>
+<property name="VariableReferenceList">
+<value>
+<value>i_K</value>
+<value>:/membrane/potassium_channel:i_K</value>
+<value>1</value>
+</value>
+<value>
+<value>g_K</value>
+<value>:/membrane/potassium_channel:g_K</value>
+<value>0</value>
+</value>
+<value>
+<value>E_K</value>
+<value>:/membrane/potassium_channel:E_K</value>
+<value>0</value>
+</value>
+<value>
+<value>V</value>
+<value>:/membrane:V</value>
+<value>0</value>
+</value>
+<value>
+<value>n</value>
+<value>:/membrane/potassium_channel/potassium_channel_n_gate:n</value>
+<value>0</value>
+</value>
+</property>
+</process>
+</system>
+<system class="System" id="/membrane/potassium_channel/potassium_channel_n_gate">
+<property name="Name">
+<value>__none__</value>
+</property>
+<property name="StepperID">
+<value>ODE</value>
+</property>
+<variable class="Variable" id="alpha_n">
+<property name="Value">
+<value>0.0</value>
+</property>
+<property name="Name">
+<value>__none__</value>
+</property>
+</variable>
+<variable class="Variable" id="beta_n">
+<property name="Value">
+<value>0.0</value>
+</property>
+<property name="Name">
+<value>__none__</value>
+</property>
+</variable>
+<variable class="Variable" id="n">
+<property name="Value">
+<value>0.0</value>
+</property>
+<property name="Name">
+<value>__none__</value>
+</property>
+</variable>
+<variable class="Variable" id="SIZE">
+<property name="Value">
+<value>1.0</value>
+</property>
+<property name="Name">
+<value>__none__</value>
+</property>
+</variable>
+<process class="ExpressionAssignmentProcess" id="alpha_n">
+<property name="Name">
+<value>__none__</value>
+</property>
+<property name="Expression">
+<value>-0.01 * ( V.Value + 65 ) / ( exp( -( V.Value + 65 ) / 10 ) - 1 )</value>
+</property>
+<property name="VariableReferenceList">
+<value>
+<value>alpha_n</value>
+<value>:/membrane/potassium_channel/potassium_channel_n_gate:alpha_n</value>
+<value>1</value>
+</value>
+<value>
+<value>V</value>
+<value>:/membrane:V</value>
+<value>0</value>
+</value>
+</property>
+</process>
+<process class="ExpressionAssignmentProcess" id="beta_n">
+<property name="Name">
+<value>__none__</value>
+</property>
+<property name="Expression">
+<value>0.125 * exp( V.Value + 75 / 80 )</value>
+</property>
+<property name="VariableReferenceList">
+<value>
+<value>beta_n</value>
+<value>:/membrane/potassium_channel/potassium_channel_n_gate:beta_n</value>
+<value>1</value>
+</value>
+<value>
+<value>V</value>
+<value>:/membrane:V</value>
+<value>0</value>
+</value>
+</property>
+</process>
+<process class="ExpressionFluxProcess" id="n">
+<property name="Name">
+<value>__none__</value>
+</property>
+<property name="Expression">
+<value>alpha_n.Value * ( 1 - n.Value ) - beta_n.Value * n.Value</value>
+</property>
+<property name="VariableReferenceList">
+<value>
+<value>n</value>
+<value>:/membrane/potassium_channel/potassium_channel_n_gate:n</value>
+<value>1</value>
+</value>
+<value>
+<value>alpha_n</value>
+<value>:/membrane/potassium_channel/potassium_channel_n_gate:alpha_n</value>
+<value>0</value>
+</value>
+<value>
+<value>beta_n</value>
+<value>:/membrane/potassium_channel/potassium_channel_n_gate:beta_n</value>
+<value>0</value>
+</value>
+</property>
+</process>
+</system>
+</eml>
