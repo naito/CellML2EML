@@ -38,9 +38,10 @@ __license__   = 'GPL'
 from ecell.eml import *
 from CellML import *
 
+import sys, os, getopt
+
+import re, numbers
 from copy import deepcopy
-import re
-import numbers
 
 
 class ecell3Model( object ):
@@ -265,7 +266,7 @@ class Process( object ):
         self.VariableReferenceList = VariableReferenceList
 
 
-def get_eml( cellml_file_path ):
+def get_eml( cellml_file_path, Stepper_class_name = 'ODEStepper' ):
     
     model = ecell3Model( CellML( cellml_file_path ) )
     
@@ -314,14 +315,88 @@ def get_eml( cellml_file_path ):
     return eml
 
 
-########  MAIN  ########
+if __name__ == '__main__':
 
-#eml = get_eml( './tentusscher_noble_noble_panfilov_2004_a.cellml' )
-#eml.save( './tentusscher_noble_noble_panfilov_2004_a.eml' )
 
-#eml = get_eml( './hodgkin_huxley_1952.cellml' )
-#eml.save( './hodgkin_huxley_1952.eml' )
+    def usage():
+        aProgramName = os.path.basename( sys.argv[0] )
 
-eml = get_eml( './goldbeter_1991.cellml' )
-eml.save( './goldbeter_1991.eml' )
+        print '''
+%(appname)s -- convert a CellML file to eml file
+
+Usage:
+    %(appname)s [-h] [-f] [-o EMLFILE] [-S STEPPER] infile
+
+Options:
+    -h or --help             : Print this message.
+    -f or --force            : Forcefully overwrite the output file
+                               even if it already exists.
+    -o or --outfile=EMLFILE  : Specify the output file name. '-' means stdout.
+    -S or --Stepper=STEPPER  : Specify the Stepper name to solve ODE. The default is ODEStepper.
+       
+''' % { 'appname': aProgramName }
+
+    ## ------------------------------------------
+    ##  command line processing
+    ## ------------------------------------------
+    
+    try:
+        opts, args = getopt.getopt(
+            sys.argv[ 1: ], "hfo:S:",
+            [ "help", "force", "outfile=", "Stepper=" ] )
+
+    except getopt.GetoptError:
+        usage()
+        sys.exit( -1 )
+
+    eml_file_name = None
+    force_overwrite_flag = 0
+    Stepper_class_name = "ODEStepper"
+
+    for an_option, an_arg in opts:
+        if an_option in ( "-h", '--help' ):
+            usage()
+            sys.exit( 0 )
+
+        if an_option in ( "-f", '--force' ):
+            force_overwrite_flag = 1
+
+        if an_option in ( "-o", "--outfile" ):
+            eml_file_name = an_arg
+
+        if an_option in ( "-S", "--Stepper" ):
+            Stepper_class_name = an_arg
+
+    if len( args ) == 0:
+        sys.stderr.write( "No input File.\n" )
+        usage()
+        sys.exit( -1 )
+
+    CellML_file_name = args[0]
+
+    file_basename = os.path.basename( CellML_file_name )
+    file_basename, extension = os.path.splitext( file_basename )
+
+    if eml_file_name == None:
+        if extension == '.cellml':
+            extension = '.eml'
+        else:
+            extension += '.eml'
+        eml_file_name = file_basename + extension
+
+    ## ------------------------------------------
+    ##  main
+    ## ------------------------------------------
+    
+#    eml = get_eml( './tentusscher_noble_noble_panfilov_2004_a.cellml' )
+#    eml.save( './tentusscher_noble_noble_panfilov_2004_a.eml' )
+
+#    eml = get_eml( './hodgkin_huxley_1952.cellml' )
+#    eml.save( './hodgkin_huxley_1952.eml' )
+
+#    eml = get_eml( './goldbeter_1991.cellml' )
+#    eml.save( './goldbeter_1991.eml' )
+
+    eml = get_eml( CellML_file_name, Stepper_class_name )
+    eml.save( eml_file_name )
 
