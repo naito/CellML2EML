@@ -51,13 +51,69 @@ CELLML_MATH_RATE_EQUATION       = 2
 CELLML_MATH_LEFT_SIDE  = 10
 CELLML_MATH_RIGHT_SIDE = 11
 
+CELLML_MATH_NODE = 20
+
 
 import xml.etree.ElementTree as et
 from xml.etree.ElementTree import XMLParser
 
+import math
+import numbers
 from copy import deepcopy
 
 class CellML( object ):
+
+    class component( object ):
+        
+        def __init__( self, name, variables = [], maths = [], reactions = [], 
+                            units = [], meta_id = '', 
+                            parent = '', children = [] ):
+            
+            self.name        = str( name )
+            self.variables   = variables
+            self.maths       = maths
+            self.reactions   = reactions
+            self.units       = units
+            self.meta_id     = str( meta_id )
+            self.parent      = str( parent )
+            self.children    = children
+
+    class grobal_variable( object ):
+        
+        def __init__( self, name, component, initial_value = None, 
+                      connection = [], units = None, meta_id = '' ):
+            self.name              = str( name )
+            self.component         = str( component )
+            self.initial_value     = initial_value
+            self.connection        = connection
+            self.units             = units
+            self.meta_id           = str( meta_id )
+        
+        def has_initial_value( self ):
+            return isinstance( self.initial_value, numbers.Number )
+
+    class local_variable( object ):
+        
+        def __init__( self, name, initial_value = None, 
+                      public_interface = 'none', private_interface = 'none', 
+                      units = None, connection = False, meta_id = '' ):
+            self.name              = str( name )
+            self.initial_value     = initial_value
+            self.public_interface  = str( public_interface )
+            self.private_interface = str( private_interface )
+            self.connection        = connection
+            self.units             = units
+            self.meta_id           = str( meta_id )
+        
+        def has_initial_value( self ):
+            return isinstance( self.initial_value, numbers.Number )
+
+    class variable_address( object ):
+        
+        def __init__( self, component, name ):
+            
+            self.component = str( component )
+            self.name      = str( name )
 
     def __init__( self, CellML_file_path ):
         
@@ -89,60 +145,101 @@ class CellML( object ):
             math_apply = '{{{0}}}math/{{{0}}}apply'.format( MATHML_NAMESPACE ),
         )
 
-        # print self.tag
+        ##----モデル構造の抽出----------------------------------------------------------------------------
 
-        self.components = {}
+        self.components = []
         self.variable_attributes = ( 'initial_value', 'public_interface', 'private_interface', 'units' )
         self.containment_hierarchies = {} ## encapsulation は要素間の隠蔽関係の定義なので、E-Cell 3 では記述対象外
         self.connections = []
-        
-        self.grobal_variables = {}
+        self.grobal_variables = []
 
         self._get_components()
+#        self._dump_components()
+
         self._get_containment_hierarchies()
+#        self._dump_containment_hierarchies()
+
         self._get_connections()
+#        self._dump_connections()
 
-        self._get_variables()
+        self._get_grobal_variables()
+        self._dump_grobal_variables()
 
+        ##----初期値の計算-------------------------------------------------------------------------------
+
+        print 'initial value calc -- {0} times'.format( self._calc_initial_values() )
+        self._dump_grobal_variables()
 
     ##-------------------------------------------------------------------------------------------------
+    ##-------------------------------------------------------------------------------------------------
     def _get_components( self ):
-        
-        ## <component> を探し、辞書 self.components に追加する。
-        ##
-        ## self.components[ name ] = {
-        ##     variable : { name : [ public_interface, units ],... },
-        ##     math     : [ mathML ],
-        ## }
-        
         
         for component_node in self.root_node.iterfind( './/' + self.tag[ 'component' ] ):
             
             if not self._has_name( component_node ):
                 raise TypeError, "Component must have name attribute."
             
-            self.components[ component_node.get( 'name' ) ] = dict( 
-                variable = {},
-                public_interface = 'none',
-                private_interface = 'none',
-                math = [] )
+#            self.components[ component_node.get( 'name' ) ] = dict( 
+#                variable = {},
+#                math = [] )
             
             ## variables
+            _variables = []
             
             for variable_node in component_node.iterfind( './/' + self.tag[ 'variable' ] ):
                 
                 if not self._has_name( variable_node ):
                     raise TypeError, "Variable must have name attribute. ( in component: %s )" % component_node.get( 'name' )
                 
-                self.set_component_variable( component_node, variable_node )
+                _variables.append( self.get_local_variable( variable_node ) )
             
                 # self._update_variable( variable_node )
             
-            ## math
+            ## maths
+            _maths = []
             
             for eq in component_node.findall( './/' + self.tag[ 'math_apply' ] ):
-                self.components[ component_node.get( 'name' ) ][ 'math' ].append( MathML( eq ) )
+                _maths.append( MathML( eq ) )
+            
+            ## reactions
+            _reactions = []
+            
+            self.components.append( self.component( 
+                component_node.get( 'name' ) ,
+                _variables, _maths, _reactions ) )
 
+    ##-------------------------------------------------------------------------------------------------
+    def get_local_variable( self, variable_node ):
+        
+        ## 後方からpop()していくための並び順
+        _variable_attributes = ( 'units', 'private_interface', 'public_interface', 'initial_value', 'name' )
+        
+        _attributes = [ variable_node.get( attrib ) for attrib in _variable_attributes ]
+        
+        return self.local_variable( 
+                   _attributes.pop(),    # name
+                   _attributes.pop(),    # initial_value
+                   _attributes.pop(),    # public_interface
+                   _attributes.pop(),    # private_interface
+                   _attributes.pop(), )  # units
+
+    ##-------------------------------------------------------------------------------------------------
+    def _has_name( self, element ):
+         if element.get( 'name' ):
+             return True
+         else:
+             return False
+
+    ##-------------------------------------------------------------------------------------------------
+    def _dump_components( self ):
+        
+        for c in self.components:
+            print '\ncomponent: {0.name}'.format( c )
+            print '  variables:'
+            for v in c.variables:
+                print '    name: {0.name:<16}  public_interface: {0.public_interface:<4}  connection: {0.connection}'.format( v )
+
+    ##-------------------------------------------------------------------------------------------------
     ##-------------------------------------------------------------------------------------------------
     def _get_containment_hierarchies( self ):
         
@@ -158,263 +255,536 @@ class CellML( object ):
         ##       comp_6 : {}
         ## }
 
-        for group_node in self.root_node.iterfind( './/' + self.tag[ 'group' ] ):
+        for gn in self.root_node.iterfind( './' + self.tag[ 'group' ] ):
+            # gn for group node
             
-            if group_node.find( './/' + self.tag[ 'relationship_ref' ] ) == None:
+            # groupエレメントの子に、relationship_refエレメントがなければエラー
+            if gn.find( './' + self.tag[ 'relationship_ref' ] ) == None:
                 raise TypeError, "<group> must have <relationship_ref> sub node."
             
-            if group_node.find( './/' + self.tag[ 'relationship_ref' ] ).get( 'relationship' ) == 'containment':
-                for top_level_component_ref in group_node.iterfind( './' + self.tag[ 'component_ref' ] ):
+            # <group relationship='containment'> に対する処理
+            if gn.find( './' + self.tag[ 'relationship_ref' ] ).get( 'relationship' ) == 'containment':
+                
+                for top_level_cr in gn.iterfind( './' + self.tag[ 'component_ref' ] ):
                     
-                    if top_level_component_ref.get( 'component' ) == None:
+                    if top_level_cr.get( 'component' ) == None:
                         raise TypeError, "<component_ref> must have 'component' attribute."
                     
-                    # print top_level_component_ref.get( 'component' )
-                    self.containment_hierarchies[ top_level_component_ref.get( 'component' ) ] = \
-                        self._get_component_ref_dict( top_level_component_ref )
+                    # print top_level_cr.get( 'component' )
+                    self.containment_hierarchies[ str( top_level_cr.get( 'component' ) ) ] = \
+                        self._get_component_ref_dict( top_level_cr )
         
         # <group>に含まれないcomponentをトップレベルに追加
-        for component_name in self.components:
-            if self.exists_in_group( component_name ) == False:
+        for component_name in [ c.name for c in self.components ]:
+            if not ( self.exists_in_group( component_name ) ):
                 self.containment_hierarchies[ component_name ] = {}
             
+
+    ##-------------------------------------------------------------------------------------------------
+    def _get_component_ref_dict( self, cr ):
+        
+        cr_dict = {}
+        
+        for child_cr in cr.iterfind( './' + self.tag[ 'component_ref' ] ):
+            if child_cr.get( 'component' ) == None:
+                raise TypeError, "<component_ref> must have 'component' attribute."
+            
+            cr_dict[ str( child_cr.get( 'component' ) ) ] = self._get_component_ref_dict( child_cr )
+        
+        return cr_dict
+
+    ##-------------------------------------------------------------------------------------------------
     def exists_in_group( self, component_name ):
         
-        for group_node in self.root_node.iterfind( './/' + self.tag[ 'group' ] ):
-            if group_node.find( './/' + self.tag[ 'relationship_ref' ] ).get( 'relationship' ) == 'containment':
-                for component_ref_node in group_node.iterfind( './/' + self.tag[ 'component_ref' ] ):
-                     if component_name == component_ref_node.get( 'component' ):
+        for gn in self.root_node.iterfind( './/' + self.tag[ 'group' ] ):
+            if gn.find( './/' + self.tag[ 'relationship_ref' ] ).get( 'relationship' ) == 'containment':
+                for cr in gn.iterfind( './/' + self.tag[ 'component_ref' ] ):
+                     if component_name == cr.get( 'component' ):
                          return True
         return False
 
+    ##-------------------------------------------------------------------------------------------------
+    def _dump_containment_hierarchies( self ):
+        
+        depth = 0
+        print '\n########################################################\nhierarchie:\n'
+        
+        for c, sub in self.containment_hierarchies.iteritems():
+            print '{0}{1}'.format( ''.join( [ '  ' ] * depth ), c )
+            
+            self._dump_containment_hierarchies_recursive( sub, depth )
 
+    ##-------------------------------------------------------------------------------------------------
+    def _dump_containment_hierarchies_recursive( self, node, depth ):
+        
+        depth += 1
+        
+        for c, sub in node.iteritems():
+            print '{0}{1}'.format( ''.join( [ '  ' ] * depth ), c )
+            
+            self._dump_containment_hierarchies_recursive( sub, depth )
+
+
+    ##-------------------------------------------------------------------------------------------------
     ##-------------------------------------------------------------------------------------------------
     def _get_connections( self ):
         
-        ## <connection> を探し、variableの同一関係をリスト self.connection に格納する。
+        ## <connection> を走査し、同一関係にあるvariableの 
+        ## variable_address のリストを self.connection に格納する。
         ##
-        ## [ [ [ component_1, variable_1 ], [ component_2, variable_2 ],... ],... ]
+        ## [ [ va_1, va_2,... ],... ]
         ##
         ## 他のvariableとconnectionを持つ場合、
         ##     self.components[ x ][ 'variable' ][ y ][ 'connection' ] = True
         ## に書き換える。
         
-        for connection_node in self.root_node.iterfind( './/' + self.tag[ 'connection' ] ):
+        for ce in self.root_node.iterfind( './' + self.tag[ 'connection' ] ):
+            # ce for connection element
             
-            map_components = connection_node.find( './/' + self.tag[ 'map_components' ] )
-            map_variables_iter  = connection_node.iterfind( './/' + self.tag[ 'map_variables' ] )
+            map_components = ce.find( './' + self.tag[ 'map_components' ] )
+            map_variables_iter  = ce.iterfind( './' + self.tag[ 'map_variables' ] )
             
             if None in ( map_components, map_variables_iter ):
                 raise TypeError, "<connection> must have both of <map_components> and <map_variables> sub nodes."
             
             for map_variables in map_variables_iter:
-                connection_map = [ dict( component = map_components.get( 'component_1' ),
-                                         variable  = map_variables.get( 'variable_1' ) ),
-                                   dict( component = map_components.get( 'component_2' ),
-                                         variable  = map_variables.get( 'variable_2' ) ) ]
                 
-                existing_connection_map = self._exists_in_connections( connection_map )
-                if existing_connection_map != False:
-                    for connection_element in connection_map:
+                connection_pair = [ self.variable_address( map_components.get( 'component_1' ),
+                                                           map_variables.get( 'variable_1' ) ),
+                                    self.variable_address( map_components.get( 'component_2' ),
+                                                           map_variables.get( 'variable_2' ) ) ]
+                
+                # DEBUG # print '########################################################\n_get_connections()\n  connection_pair: {0[0].component}:{0[0].name} & {0[1].component}:{0[1].name}'.format( connection_pair )
+#               # DEBUG # self._dump_connections()
+#               # DEBUG # raw_input( 'press any key' )
+                
+                icl = self._get_including_connection_list( connection_pair )
+                if icl == None:
+                    self.connections.append( connection_pair )
+                    for va in connection_pair:
+                        self._set_local_variable_connection_true( va )
+                else:
+                    for va in connection_pair:
                         exists = False
-                        for existing_connection in existing_connection_map:
-                            if connection_element == existing_connection:
+                        for x_va in icl:
+                            if self._is_same_variable_address( va, x_va ):
                                 exists = True
                         if not exists:
-                            existing_connection_map.append( connection_element )
-                            self._set_componet_variable_connection_true( connection_element )
-                
-                else:
-                    self.connections.append( connection_map )
-                    for connection_element in connection_map:
-                        self._set_componet_variable_connection_true( connection_element )
+                            icl.append( va )
+                            self._set_local_variable_connection_true( va )
+
+    ##-------------------------------------------------------------------------------------------------
+    def _get_including_connection_list( self, connection_pair ):
         
+        ## connection_pair: 新たに読み取ったconnection（要素はva２つ）
+        ## そのいずれかを含むconnection_listがself.connections中にあれば
+        ## そのインデックスを返す。なければNoneを返す。
+        
+        for va in connection_pair:
+            for x_cn in self.connections:
+                for x_va in x_cn:
+                    if self._is_same_variable_address( va, x_va ):
+                        return x_cn
+        return None
+
+    ##-------------------------------------------------------------------------------------------------
+    def _set_local_variable_connection_true( self, variable_address ):
+        
+        self._get_local_variable_by_variable_address( variable_address ).connection = True
         
 
     ##-------------------------------------------------------------------------------------------------
-    def _get_variables( self ):
+    def _is_same_variable_address( self, va_1, va_2 ):
         
-        for component_name, component_element in self.components.iteritems():
-            
-            for variable_name, variable_element in component_element[ 'variable' ].iteritems():
-                
-                if not variable_element[ 'connection' ]:
-                    
-                    variable_ID = dict( component = component_name, variable  = variable_name )
-                    
-                    self.grobal_variables[ ( component_name, variable_name ) ] = dict(
-                        variable   = variable_element,
-                        connection = [ variable_ID ] )
-        
-        for connection_map in self.connections:
-            
-            actual = self._get_actual_properties_of_variable( connection_map )
-            
-            if actual:
-                self.grobal_variables[ ( actual[ 'component' ], actual[ 'name' ] ) ] = dict(
-                            variable   = actual[ 'variable' ],
-                            connection = connection_map )
+        if ( str( va_1.component ) == str( va_2.component  ) ) and \
+           ( str( va_1.name )      == str( va_2.name       ) ):
+               return True
+        else:
+            return False
 
     ##-------------------------------------------------------------------------------------------------
-    def _get_actual_properties_of_variable( self, connection_map ):
+    def _dump_connections( self ):
         
-        actual = {}
+        print '\n########################################################\nconnection:\n'
         
-        containing_component_IDs = []
+        for cn in self.connections:
+            # cn for connection list
+            for va in cn:
+                _indent = ''.join( [' '] * ( 60 - len( va.component ) - len( va.name ) ) )
+                print '  {0.component}:{0.name}{1}{2}'.format( va, _indent, self._get_local_variable_by_variable_address( va ).public_interface )
+            print ''
+
+
+    ##-------------------------------------------------------------------------------------------------
+    ##-------------------------------------------------------------------------------------------------
+    def _get_grobal_variables( self ):
         
-        best_variable_ID = self._get_variable_with_initial_value( connection_map )
+        for c in self.components:
+            for v in c.variables:
+                if not v.connection:
+                    self.grobal_variables.append( self.grobal_variable(
+                        v.name, c.name, v.initial_value, 
+                        [ self.variable_address( c.name, v.name ) ] ) )
         
-        if not best_variable_ID:
-            best_variable_ID = dict(
-                component = connection_map[ 0 ][ 'component' ],
-                variable  = connection_map[ 0 ][ 'variable' ] )
-        
-        for variable_ID in connection_map:
+        for connection_list in self.connections:
             
-            if self.components[ variable_ID[ 'component' ] ][ 'variable' ][ variable_ID[ 'variable' ] ][ 'public_interface' ] == 'out':
-                
-                containing_component_IDs.append( variable_ID )
-        
-        if len( containing_component_IDs ) == 0:
+            genuine_va = self._get_genuine_from_connection( connection_list )
             
-            return dict(
-                component = '/',
-                name      = best_variable_ID[ 'variable' ],
-                variable  = self.components[ best_variable_ID[ 'component' ] ][ 'variable' ][ best_variable_ID[ 'variable' ] ] )
+            if genuine_va:
+                self.grobal_variables.append( self.grobal_variable( 
+                    genuine_va.name,
+                    genuine_va.component,
+                    self._get_local_variable_by_variable_address( genuine_va ).initial_value,
+                    connection_list ) )
+
+    ##-------------------------------------------------------------------------------------------------
+    def _get_genuine_from_connection( self, connection_list ):
         
-        elif len( containing_component_IDs ) == 1:
-            
-            return dict(
-                component = containing_component_IDs[ 0 ][ 'component' ],
-                name      = containing_component_IDs[ 0 ][ 'variable' ],
-                variable  = self.components[ best_variable_ID[ 'component' ] ][ 'variable' ][ best_variable_ID[ 'variable' ] ] )
+        ## connection_list中のvariable_addressから真正（genuine）を
+        ## 選んで返す。
+        ## CellMLの仕様では、public_interface = out のvariableは
+        ## connection中にひとつしかなく、このvariableが初期値を持つことに
+        ## なっているので、それを利用。
+#        for va in connection_list:
+#            print 'list   : {0.component}:{0.name}'.format( va )
+#        print ''
+        
+        genuine = [ va for va in connection_list 
+                    if self._get_local_variable_by_variable_address( va ).public_interface == 'out' ]
+        
+#        for gva in genuine:
+#            print 'genuine: {0.component}:{0.name}'.format( gva )
+#        print ''
+        
+        if len( genuine ) == 1:
+            return genuine.pop()
+        
+        elif len( genuine ) >= 2:       #### FIXME #### public_interface == 'out'が２つ以上ある場合への対処
+            return genuine.pop( 0 )
         
         else:
-            actual_variable_ID = self._get_actual_variable_ID( containing_component_IDs )
-            
-            return dict(
-                component = actual_variable_ID[ 'component' ],
-                name      = actual_variable_ID[ 'variable' ],
-                variable  = self.components[ best_variable_ID[ 'component' ] ][ 'variable' ][ best_variable_ID[ 'variable' ] ] )
+            raise TypeError, "Exact 1 variable among connection must be set public_interface = 'out'."
 
     ##-------------------------------------------------------------------------------------------------
-    def _get_actual_variable_ID( self, containing_component_IDs ):
+    def _get_local_variable_by_variable_address( self, variable_address ):
         
-        containing_components = [ ID[ 'component' ] for ID in containing_component_IDs ]
-        score_dict = dict( [ ( c, 0 ) for c in containing_components ] )
+        c = self._get_component_by_name( variable_address.component )
         
-        for component, sub_components in self.containment_hierarchies.iteritems():
+        for v in c.variables:
+            if v.name == variable_address.name:
+                return v
+        
+        return None
+
+    ##-------------------------------------------------------------------------------------------------
+    def _get_grobal_variable_by_variable_address( self, va ):
+        
+        # connectionに引数vaを持つgrobal_variableを返す。
+        # va: variable_addressオブジェクト
+        
+        for gv in self.grobal_variables:
+            for gv_va in gv.connection:
+                if self._is_same_variable_address( va, gv_va ):
+                    return gv
+        return None
+
+    ##-------------------------------------------------------------------------------------------------
+    def _get_component_by_name( self, name ):
+        
+        for e in self.components:
+            if e.name == name:
+                return e
+        
+        return None
+
+    ##-------------------------------------------------------------------------------------------------
+    def _dump_grobal_variables( self ):
+        
+        print '\n########################################################\ngrobal_variables:\n'
+        
+        for gv in self.grobal_variables:
+            _indent = ''.join( [' '] * ( 60 - len( gv.component ) - len( gv.name ) ) )
+            print '  {0.component}:{0.name}{1}initial value = {0.initial_value}'.format( gv, _indent )
+        print ''
+
+
+    ##-------------------------------------------------------------------------------------------------
+    ##-------------------------------------------------------------------------------------------------
+    def _calc_initial_values( self ):
+        
+        # 決定した初期値は該当するgrobal_variablesに書き込む。
+        # 新たに決定した初期値の数を返す。
+        
+        gain = 0
+        prev_gain = -1
+        
+        while gain - prev_gain:
             
-            if component in containing_components:
-                score_dict[ component ] += 1
+            prev_gain = gain
             
-            self._add_sub_components_score( score_dict, [ component ], sub_components, containing_components )
-        
-        max_score = 0
-        actual_component = None
-        
-#        print 'Actual extraction: %s' % score_dict
-        
-        for component, score in score_dict.iteritems():
-            
-            if score > max_score:
-                max_score = score
-                actual_component = component
-        
-        for ID in containing_component_IDs:
-            
-            if ID[ 'component' ] == actual_component:
+            for gv in self.grobal_variables:
                 
-#                print '                 : %s' % ID
-                return ID
-
+                if not gv.has_initial_value():
+                    
+                    if not ( self._calc_initial_value( self.variable_address( gv.component, gv.name ) ) ):
+                        # まず、実体に対して初期値計算を試みる。
+                        # Falseの場合、connection関係にあるlocal_variableについても初期値計算を試みる
+                        
+                        for va in  [ _va for _va in gv.connection 
+                                         if self._get_local_variable_by_variable_address( _va ).public_interface == 'out' ]:
+                            
+                            lv = self._get_local_variable_by_variable_address( va )
+                            if lv.has_initial_value():
+                                gv.initial_value = lv.initial_value
+                                gain += 1
+                                break
+                            
+                            else:
+                                if self._calc_initial_value( va ):
+                                    gain += 1
+                                    break
+                    else:
+                        gain += 1
+        
+        return gain
 
     ##-------------------------------------------------------------------------------------------------
-    def _add_sub_components_score( self, score_dict, parents, components, containing_components ):
+    def _calc_initial_value( self, va ):
         
-        for component, sub_components in components.iteritems():
-            
-            if component in containing_components:
-                score_dict[ component ] += 1
-                for parent in parents:
-                    if parent in containing_components:
-                        score_dict[ parent ] += 1
-            
-            if len( sub_components ) > 0:
-                next_parents = deepcopy( parents )
-                next_parents.append( component )
-                self._add_sub_components_score( score_dict, next_parents, sub_components, containing_components )
-            
-
-    ##-------------------------------------------------------------------------------------------------
-    def _get_variable_with_initial_value( self, connection_map ):
+        # 新たな初期値を決定できた場合 True を、
+        # できなかった場合 False を返す。
         
-        hits = []
+        c = self._get_component_by_name( va.component )
         
-        for variable_ID in connection_map:
-            if self.components[ variable_ID[ 'component' ] ][ 'variable' ][ variable_ID[ 'variable' ] ].has_key( 'initial_value' ):
-                hits.append( variable_ID )
+        m = [ _m for _m in c.maths if ( _m.type == CELLML_MATH_ASSIGNMENT_EQUATION ) and ( _m.variable == va.name ) ]
         
-        if len( hits ) == 1:
-            return hits[ 0 ]
+        if len( m ) >= 2:
+            raise TypeError, "multiple maths describe variable '{0.name}' in component '{0.component}'.".format( va )
         
-        elif len( hits ) == 0:
+        elif len( m ) == 0:
             return False
         
         else:
-            error_variable_str = []
-            for variable_ID in hits:
-                error_variable_str.append( '"%s/%s"' % ( variable_ID[ 'component' ], variable_ID[ 'variable' ] ) )
+            m = m[ 0 ]
             
-            raise TypeError, "Initial value is set more than once in ( %s )" % ", ".join( error_variable_str )
-
-    ##-------------------------------------------------------------------------------------------------
-    def _set_componet_variable_connection_true( self, connection_element ):
-        
-        self.components[ connection_element[ 'component' ] ][ 'variable' ][ connection_element[ 'variable' ] ][ 'connection' ] = True
-        
-    ##-------------------------------------------------------------------------------------------------
-    def _exists_in_connections( self, connection_map ):
-        
-        for connection in connection_map:
-            for existing_connection_map in self.connections:
-                for existing_connection in existing_connection_map:
-                    if connection == existing_connection:
-                        return existing_connection_map
-        return False
-
-    ##-------------------------------------------------------------------------------------------------
-    def _get_component_ref_dict( self, component_ref_node ):
-        
-        component_ref_dict = {}
-        
-        for child_component_ref_node in component_ref_node.iterfind( './' + self.tag[ 'component_ref' ] ):
-            if child_component_ref_node.get( 'component' ) == None:
-                raise TypeError, "<component_ref> must have 'component' attribute."
+            value = self._calc_math( m, m.right_side, va )
             
-            component_ref_dict[ child_component_ref_node.get( 'component' ) ] = self._get_component_ref_dict( child_component_ref_node )
-        
-        return component_ref_dict
+            if value == None:
+                return False
+            else:
+                self._get_grobal_variable_by_variable_address( va ).initial_value = value
+                return True
 
     ##-------------------------------------------------------------------------------------------------
-    def set_component_variable( self, component_node, variable_node ):
+    def _calc_math( self, math, element, va ):            ### MathML._convert_element_to_Expression()
         
-        variable_dict = dict( 
-            public_interface  = 'none',
-            private_interface = 'none',
-            connection        = False )
-        for attrib in self.variable_attributes:
-            if variable_node.get( attrib ):
-                variable_dict[ attrib ] = variable_node.get( attrib )
+        # math は 右辺 に限る。チェック機能は未実装。
+        # 実数による値を求めて返す（float）。
+        # 値を求められなかった場合、Noneを返す。
         
-        self.components[ component_node.get( 'name' ) ][ 'variable' ][ variable_node.get( 'name' ) ] = variable_dict
+#        return 1.0
+        
+        if math.type != CELLML_MATH_ASSIGNMENT_EQUATION:
+            raise TypeError, "_calc_math(): math.type must be assignment equation. ({0.component}:{0.name})".format( va )
+        
+        if   element.tag == math.tag[ 'cn' ]:
+#            print '_calc_math( {0.component}:{0.name} )  <cn>'.format( va )
+            return float( element.text )
+        
+        elif element.tag == math.tag[ 'ci' ]:
+#            print '_calc_math( {0.component}:{0.name} )  <ci>'.format( va )
+            _gv = self._get_grobal_variable_by_variable_address( self.variable_address( va.component, element.text ) )
+            if _gv.has_initial_value():
+#                print '    initial_value = {0.initial_value}'.format( _gv )
+                return float( _gv.initial_value )
+            else:
+                return None
+            
+        elif element.tag == math.tag[ 'apply' ]:
+#            print '_calc_math( {0.component}:{0.name} )  <apply>'.format( va )
+            return self._calc_math_apply( math, element, va )
+            
+        elif element.tag == math.tag[ 'piecewise' ]:
+#            print '_calc_math( {0.component}:{0.name} )  <piecewise>'.format( va )
+            return self._calc_math_piecewise( math, element, va )
+        
+        else:
+            raise TypeError, "_calc_math(): element tag '{0._get_tag_without_namespace(0.root_node.tag)}' is not implemented.".format( math )
 
     ##-------------------------------------------------------------------------------------------------
-    def _has_name( self, element ):
-         if element.get( 'name' ):
-             return True
-         else:
-             return False
+    def _calc_math_apply( self, math, element, va ):
+        
+#        return 1.0
+        
+        children = element.findall( './*' )
+        tag = children.pop( 0 ).tag
+       
+        children_values = [ self._calc_math( math, child, va ) for child in children ]
+        
+        if None in children_values:
+            return None
+        
+        # Unary arithmetic
+        if ( tag == math.tag[ 'minus' ] ) and ( len( children_values ) == 1 ):
+            return - children_values[ 0 ]
+        
+        # Binary arithmetic
+        elif tag == math.tag[ 'divide' ]:
+            return children_values[ 0 ] / children_values[ 1 ]
+        
+        elif tag == math.tag[ 'minus' ]:
+            return children_values[ 0 ] - children_values[ 1 ]
+        
+        # Nary arithmetic
+        elif tag in math.tag_group[ 'nary_arith' ]:
+            _value = children_values.pop( 0 )
+            
+            while len( children_values ):
+                
+                if   tag == math.tag[ 'times' ]:
+                    _value *= children_values.pop( 0 )
+                elif tag == math.tag[ 'plus' ]:
+                    _value += children_values.pop( 0 )
+            
+            return _value
+        
+        # Unary function
+        elif ( tag in math.tag_group[ 'unary_func' ] ) or \
+             ( tag in math.tag_group[ 'unary_binary_func' ] and len( children_values ) == 1 ):
+            
+            if tag == math.tag[ 'not' ]:
+                return int( not( children_values[ 0 ] ) )
+            
+            elif tag == math.tag[ 'abs' ]:
+                return abs( children_values[ 0 ] )
+            
+            elif tag == math.tag[ 'floor' ]:
+                return math.floor( children_values[ 0 ] )
+            
+            elif tag == math.tag[ 'ceiling' ]:
+                return math.ceil( children_values[ 0 ] )
+            
+            elif tag == math.tag[ 'factorial' ]:
+                return math.factorial( children_values[ 0 ] )
+            
+            elif tag == math.tag[ 'exp' ]:
+                return math.exp( children_values[ 0 ] )
+            
+            elif tag == math.tag[ 'ln' ]:
+                return math.log( children_values[ 0 ] )
+            
+            elif tag == math.tag[ 'log' ]:
+                return math.log10( children_values[ 0 ] )
+            
+            elif tag == math.tag[ 'sin' ]:
+                return math.sin( children_values[ 0 ] )
+            
+            elif tag == math.tag[ 'cos' ]:
+                return math.cos( children_values[ 0 ] )
+            
+            elif tag == math.tag[ 'tan' ]:
+                return math.tan( children_values[ 0 ] )
+            
+            elif tag == math.tag[ 'arcsin' ]:
+                return math.asin( children_values[ 0 ] )
+            
+            elif tag == math.tag[ 'arccos' ]:
+                return math.acos( children_values[ 0 ] )
+            
+            elif tag == math.tag[ 'arctan' ]:
+                return math.atan( children_values[ 0 ] )
+            
+            elif tag == math.tag[ 'root' ]:
+                return math.sqrt( children_values[ 0 ] )
+
+#            self.tag[ 'sec' ],
+#            self.tag[ 'csc' ],
+#            self.tag[ 'cot' ],
+#            self.tag[ 'sinh' ],
+#            self.tag[ 'cosh' ],
+#            self.tag[ 'tanh' ],
+#            self.tag[ 'sech' ],
+#            self.tag[ 'csch' ],
+#            self.tag[ 'coth' ],
+#            self.tag[ 'arccosh' ],
+#            self.tag[ 'arccot' ],
+#            self.tag[ 'arccoth' ],
+#            self.tag[ 'arccsc' ],
+#            self.tag[ 'arccsch' ],
+#            self.tag[ 'arcsec' ],
+#            self.tag[ 'arcsech' ],
+#            self.tag[ 'arcsinh' ],
+#            self.tag[ 'arctanh' ], ],
+
+        
+        # Binary function
+        
+        elif tag == math.tag[ 'neq' ]:
+            if children_values[ 0 ] != children_values[ 1 ]:
+                return 1
+            else:
+                return 0
+        
+        elif tag == math.tag[ 'power' ]:
+            return math.pow( children_values[ 0 ], children_values[ 1 ] )
+        
+        elif tag == math.tag[ 'root' ]:
+            return math.pow( children_values[ 0 ], 1.0 / children_values[ 1 ] )
+        
+        # Nary nest function
+        elif tag in math.tag_group[ 'nary_arith' ]:
+            _value = children_values.pop( 0 )
+            
+            while len( children_values ):
+                
+                if   tag == math.tag[ 'and' ]:
+                    _value = _value and children_values.pop( 0 )
+                elif tag == math.tag[ 'or' ]:
+                    _value = _value or children_values.pop( 0 )
+                elif tag == math.tag[ 'xor' ]:
+                    _value = not( _value or children_values.pop( 0 ) )
+            
+            return _value
+        
+        # Nary chain function
+        elif tag in math.tag_group[ 'nary_chain_func' ]:
+            
+            _value   = True
+            _value_2 = children_values.pop( 0 )
+            
+            while len( children_values ):
+                
+                _value_1 = _value_2
+                _value_2 = children_values.pop( 0 )
+                
+                if   tag == math.tag[ 'eq' ]:
+                    if not( _value_1 == _value_2 ):
+                        _value = False
+                elif tag == math.tag[ 'gt' ]:
+                    if not( _value_1 > _value_2 ):
+                        _value = False
+                elif tag == math.tag[ 'lt' ]:
+                    if not( _value_1 < _value_2 ):
+                        _value = False
+                elif tag == math.tag[ 'geq' ]:
+                    if not( _value_1 >= _value_2 ):
+                        _value = False
+                elif tag == math.tag[ 'leq' ]:
+                    if not( _value_1 <= _value_2 ):
+                        _value = False
+            
+            if _value:
+                return 1
+            else:
+                return 0
+        
+        else:
+            return None
+
+
+    ##-------------------------------------------------------------------------------------------------
+    def _calc_math_piecewise( self, math, element, va ):
+        return 1.0
 
 
 ##=====================================================================================================
@@ -727,8 +1097,8 @@ class MathML( object ):
             self.tag[ 'root' ]      : 'sqrt',  # when Unary
             self.tag[ 'abs' ]       : 'abs',
             self.tag[ 'exp' ]       : 'exp',
-            self.tag[ 'ln' ]        : 'ln',
-            self.tag[ 'log' ]       : 'log',
+            self.tag[ 'ln' ]        : 'log',
+            self.tag[ 'log' ]       : 'log10',
             self.tag[ 'floor' ]     : 'floor',
             self.tag[ 'ceiling' ]   : 'ceiling',
             self.tag[ 'factorial' ] : 'factorial',
@@ -921,7 +1291,7 @@ class MathML( object ):
             if tags in tag_pattern:
                 return type
         
-        return False
+        return None
     
     ##-------------------------------------------------------------------------------------------------
     def get_equation_variable( self ):
@@ -936,7 +1306,7 @@ class MathML( object ):
         else:
             return left_side_Element.text
         
-        return False
+        return None
     
     ##-------------------------------------------------------------------------------------------------
     def get_left_side( self ):
@@ -1029,8 +1399,6 @@ class MathML( object ):
         
         operator = children.pop( 0 )
         return self._convert_applying_Elements_to_Expression( operator.tag, children )
-        
-        return self.Expression( '((( %s,... )))' % self._get_tag_without_namespace( operator.tag ), 255 )
     
     ##-------------------------------------------------------------------------------------------------
     def _convert_piecewise_element_to_Expression( self, element ):

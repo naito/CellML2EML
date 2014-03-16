@@ -40,6 +40,7 @@ from CellML import *
 
 from copy import deepcopy
 import re
+import numbers
 
 
 class ecell3Model( object ):
@@ -54,10 +55,10 @@ class ecell3Model( object ):
         
         self._get_Systems( CellML )
         
-        print '\nSystems:\n'
-        for S in self.Systems:
-            print '%s:%s' % ( S.path, S.ID )
-        print '\n'
+#        print '\nSystems:\n'
+#        for S in self.Systems:
+#            print '%s:%s' % ( S.path, S.ID )
+#        print '\n'
         
         self._get_Variables( CellML )
         self._get_Processes( CellML )
@@ -83,22 +84,16 @@ class ecell3Model( object ):
     ##-------------------------------------------------------------------------------------------------
     def _get_Variables( self, CellML ):
         
-        for actual, properties in CellML.grobal_variables.iteritems():
+        for gv in CellML.grobal_variables:
             
-            component, name = actual
+            self.Variables.append( Variable( 
+                self._get_path_of_super_component( gv.component ),
+                gv.name,
+                gv.initial_value ) )
             
-            if properties[ 'variable' ].has_key( 'initial_value' ):
-                self.Variables.append( Variable( 
-                    self._get_path_of_super_component( component ),
-                    name,
-                    properties[ 'variable' ][ 'initial_value' ] ) )
-            
-            else:
-                self.Variables.append( Variable( 
-                    self._get_path_of_super_component( component ),
-                    name ) )
-            
-            print 'Variable:%s:%s' % ( self.Variables[ -1 ].path, self.Variables[ -1 ].ID )
+#            print 'Variable:%s:%s' % ( self.Variables[ -1 ].path, self.Variables[ -1 ].ID )
+        
+        ## SIZE Variable
         
         for S in self.Systems:
             if len( [ V for V in self.Variables 
@@ -113,31 +108,33 @@ class ecell3Model( object ):
     ##-------------------------------------------------------------------------------------------------
     def _get_Processes( self, CellML ):
         
-        for c_name, c_property in CellML.components.iteritems():
+        for c in CellML.components:
             
-            variables = [ self._get_grobal_variable( v, c_name, CellML ) for v in c_property[ 'variable' ] ]
-            math      = [ m for m in c_property[ 'math' ] ]
-            path      = self._get_path_of_super_component( c_name )
+            VariableReference_list = [ self._get_VariableReference( lv, c, CellML ) for lv in c.variables ]
+#            math = [ m for m in c.maths ]
+            path = self._get_path_of_super_component( c.name )
             
 #            print '\nSystem: %s' % c_name
 #            print 'variables: %s' % variables
             
-            [ self._append_Process( m, variables, path ) for m in math ]
+            [ self._append_Process( m, VariableReference_list, path ) for m in c.maths ]
     
     ##-------------------------------------------------------------------------------------------------
-    def _get_grobal_variable( self, variable, component, CellML ):
+    def _get_VariableReference( self, lv, c, CellML ):
         
-        for grobal_variable, pr in CellML.grobal_variables.iteritems():
+        ## lv : local_variable オブジェクト
+        ## c  : component オブジェクト
+        
+        for gv in CellML.grobal_variables:
             
-            for local_variable in pr[ 'connection' ]:
-                if ( local_variable[ 'component' ] == component ) and ( local_variable[ 'variable' ] == variable ):
-                    _component, _ID = grobal_variable
-                    return ( variable, ':{0}:{1}'.format( self._get_path_of_super_component( _component ), _ID ) )
+            for va in gv.connection:
+                if ( va.component == c.name ) and ( va.name == lv.name ):
+                    return ( lv.name, ':{0}:{1}'.format( self._get_path_of_super_component( gv.component ), gv.name ) )
         
-        raise TypeError, "_get_grobal_variable(): global variable is not found."
+        raise TypeError, "_get_VariableReference(): global variable is not found."
     
     ##-------------------------------------------------------------------------------------------------
-    def _append_Process( self, math, variables, path ):
+    def _append_Process( self, math, VariableReference_list, path ):
         
         ## math: MathMLオブジェクト
         ## variables: variable名のリスト
@@ -152,7 +149,7 @@ class ecell3Model( object ):
         else:
             return
         
-        Expression, VariableReferenceList = self._get_Expression_and_VariableReferenceList( math, variables )
+        Expression, VariableReferenceList = self._get_Expression_and_VariableReferenceList( math, VariableReference_list )
         
         self.Processes.append( Process( cls, path, ID, VariableReferenceList, Expression ) )
 #        print '\n%s:%s:%s' % ( self.Processes[ -1 ].cls, self.Processes[ -1 ].path, self.Processes[ -1 ].ID )
@@ -160,7 +157,7 @@ class ecell3Model( object ):
 #        print '    %s\n' % self.Processes[ -1 ].VariableReferenceList
     
     ##-------------------------------------------------------------------------------------------------
-    def _get_Expression_and_VariableReferenceList( self, math, variables ):
+    def _get_Expression_and_VariableReferenceList( self, math, VariableReference_list ):
         
         math_Element = deepcopy( math.right_side )
         
@@ -170,7 +167,7 @@ class ecell3Model( object ):
         if not ( math.variable in ci_text_list ):
             ci_text_list.append( math.variable )
         
-        VariableReferenceList = [ list( v ) for v in variables if ( v[ 0 ] in ci_text_list ) ]
+        VariableReferenceList = [ list( v ) for v in VariableReference_list if ( v[ 0 ] in ci_text_list ) ]
         
         for vr in VariableReferenceList:
             if math.variable == vr[ 0 ]:
@@ -178,7 +175,7 @@ class ecell3Model( object ):
             else:
                 vr.append( '0' )
         
-        for v in variables:
+        for v in VariableReference_list:
             for ci in ci_list:
                 if ci.text == v[ 0 ]:
                     ci.text = v[ 0 ] + '.Value'
@@ -232,7 +229,7 @@ class ecell3Model( object ):
         for S in self.Systems:
            if S.ID == super_component_name:
                return self._convert_Entity_to_path( S )
-        return False
+        return None
 
 
 class System( object ):
@@ -247,11 +244,15 @@ class System( object ):
 
 class Variable( object ):
         
-    def __init__( self, path, ID, Value = 'NaN', Name = '__none__' ):
+    def __init__( self, path, ID, Value = None, Name = '__none__' ):
         
         self.path  = path
         self.ID    = ID
-        self.Value = Value
+        if isinstance( Value, numbers.Number ):
+            self.Value = Value
+        else:
+            self.Value = 0.0    #### for DEBUG
+#            self.Value = '__UNDEFINED__'
         self.Name  = Name
         
 
@@ -292,7 +293,10 @@ def get_eml( cellml_file_path ):
         
         _FullID = 'Variable:{0}:{1}'.format( v.path, v.ID )
         eml.createEntity( 'Variable', _FullID )
-        eml.setEntityProperty( _FullID, 'Value', [ str( v.Value ) ] )
+        if v.Value == '__UNDEFINED__':       ## __UNDEFINED__ がEMLに埋め込まれるとsessionが転ける
+            eml.setEntityProperty( _FullID, 'Value', [ str( 0.0 ) ] )
+        else:
+            eml.setEntityProperty( _FullID, 'Value', [ str( v.Value ) ] )
         eml.setEntityProperty( _FullID, 'Name',  [ v.Name ] )
 
     for p in model.Processes:
@@ -308,28 +312,12 @@ def get_eml( cellml_file_path ):
 
 ########  MAIN  ########
 
-#CM = CellML( './tentusscher_noble_noble_panfilov_2004_a.cellml' )
-
-#print CM.root_node.tag
-#print CM.root_node.attrib
-
-#print 'namespace: %s' % CM.namespace
-#print '\n\ncomponent:\n%s' % CM.components
-#print '\n\nvariable:\n%s' % CM.grobal_variables
-#print '\n\ncontainment_hierarchies:\n%s' % CM.containment_hierarchies
-#print '\n\nconnections:\n%s' % CM.connections
-
-#for component in CM.components.itervalues():
-#    for math in component[ 'math' ]:
-#       print '\n' + math.get_expression_str()
-#       pass
-
-#model = ecell3Model( CM )
-
-#for component, FullID in model.Systems.iteritems():
-#    #print '{} : {}'.format( component, FullID )
-#    pass
-
 eml = get_eml( './tentusscher_noble_noble_panfilov_2004_a.cellml' )
 eml.save( './tentusscher_noble_noble_panfilov_2004_a.eml' )
+
+eml = get_eml( './hodgkin_huxley_1952.cellml' )
+eml.save( './hodgkin_huxley_1952.eml' )
+
+eml = get_eml( './goldbeter_1991.cellml' )
+eml.save( './goldbeter_1991.eml' )
 
