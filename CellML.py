@@ -57,11 +57,19 @@ CELLML_MATH_NODE = 20
 import xml.etree.ElementTree as et
 from xml.etree.ElementTree import XMLParser
 
-from math import floor, ceil, factorial, exp, log, log10, sin, cos, tan, asin, acos, atan, sqrt, pow
+from math import floor, ceil, factorial, exp, log, log10, \
+                 sin, cos, tan, asin, acos, atan, sqrt, pow
 import numbers
 from copy import deepcopy
 
+
+##=====================================================================================================
+##  CellMLクラス
+##=====================================================================================================
+
 class CellML( object ):
+
+    ##----クラス内クラス--------------------------------------------------------------
 
     class component( object ):
         
@@ -79,6 +87,9 @@ class CellML( object ):
             self.children    = children
 
     class grobal_variable( object ):
+    # component間のvariableのconnection（同一関係）を解決し、
+    # モデル中に「実存」するvariableを格納するクラス。
+    # local_variableとの対応関係も格納する。
         
         def __init__( self, name, component, initial_value = None, 
                       connection = [], units = None, meta_id = '' ):
@@ -93,6 +104,7 @@ class CellML( object ):
             return isinstance( self.initial_value, numbers.Number )
 
     class local_variable( object ):
+    # component中で定義されるvariableの属性を格納するクラス
         
         def __init__( self, name, initial_value = None, 
                       public_interface = 'none', private_interface = 'none', 
@@ -109,11 +121,26 @@ class CellML( object ):
             return isinstance( self.initial_value, numbers.Number )
 
     class variable_address( object ):
+    # componentと、その中でのvariable名のペア。
+    # モデル中のユニークなひとつのvariableを指すIDとして機能する。
         
         def __init__( self, component, name ):
             
             self.component = str( component )
             self.name      = str( name )
+
+    class grobal_math( object ):
+    # mathエレメントの多項式を分解し、math間の共通項を抽出して、
+    # 量論係数とともに格納するためのクラス。
+    
+        def __init__( self, component, math ):
+            
+            self.component   = str( component )             ## component名
+            self.local_math  = math                         ## MathMLオブジェクト（local_variable名）
+            self.grobal_math = deepcopy( self.local_math )  ## MathMLオブジェクト（grobal_variableに置換）
+
+
+    ##----初期化----------------------------------------------------------------------
 
     def __init__( self, CellML_file_path ):
         
@@ -145,13 +172,14 @@ class CellML( object ):
             math_apply = '{{{0}}}math/{{{0}}}apply'.format( MATHML_NAMESPACE ),
         )
 
-        ##----モデル構造の抽出----------------------------------------------------------------------------
+        ##----モデル構造の抽出-------------
 
         self.components = []
         self.variable_attributes = ( 'initial_value', 'public_interface', 'private_interface', 'units' )
         self.containment_hierarchies = {} ## encapsulation は要素間の隠蔽関係の定義なので、E-Cell 3 では記述対象外
         self.connections = []
         self.grobal_variables = []
+        self.grobal_maths = []
 
         self._get_components()
 #        self._dump_components()
@@ -165,11 +193,12 @@ class CellML( object ):
         self._get_grobal_variables()
 #        self._dump_grobal_variables()
 
-        ##----初期値の計算-------------------------------------------------------------------------------
+        ##----初期値の計算----------------
 
         self._calc_initial_values()
 #        print '\ninitial value calc -- {0} round(s) invoked.\n'.format( self._calc_initial_values() )
         self._dump_grobal_variables()
+        self._dump_grobal_maths()
 
     ##-------------------------------------------------------------------------------------------------
     ##-------------------------------------------------------------------------------------------------
@@ -179,10 +208,8 @@ class CellML( object ):
             
             if not self._has_name( component_node ):
                 raise TypeError, "Component must have name attribute."
-            
-#            self.components[ component_node.get( 'name' ) ] = dict( 
-#                variable = {},
-#                math = [] )
+            else:
+                _component_name = component_node.get( 'name' )
             
             ## variables
             _variables = []
@@ -200,14 +227,25 @@ class CellML( object ):
             _maths = []
             
             for eq in component_node.findall( './/' + self.tag[ 'math_apply' ] ):
-                _maths.append( MathML( eq ) )
+                _MathML = MathML( eq )
+                _maths.append( _MathML )
+                self.grobal_maths.append( self.grobal_math( _component_name, deepcopy( _MathML ) ) )
             
             ## reactions
             _reactions = []
             
+            ###############################
+            ##                           ##
+            ##   reaction の処理は未実装   ##
+            ##                           ##
+            ###############################
+            
+            ## register component object
             self.components.append( self.component( 
-                component_node.get( 'name' ) ,
-                _variables, _maths, _reactions ) )
+                _component_name ,
+                _variables, 
+                _maths, 
+                _reactions ) )
 
     ##-------------------------------------------------------------------------------------------------
     def get_local_variable( self, variable_node ):
@@ -419,7 +457,9 @@ class CellML( object ):
     ##-------------------------------------------------------------------------------------------------
     ##-------------------------------------------------------------------------------------------------
     def _get_grobal_variables( self ):
-        
+    # grobal_variablesを書き込む。
+    # 引きつづき、grobal_mathsにgrobal_mathを書き込む。
+    
         for c in self.components:
             for v in c.variables:
                 if not v.connection:
@@ -437,6 +477,9 @@ class CellML( object ):
                     genuine_va.component,
                     self._get_local_variable_by_variable_address( genuine_va ).initial_value,
                     connection_list ) )
+        
+        for gm in self.grobal_maths:
+            self._get_grobal_math( gm )
 
     ##-------------------------------------------------------------------------------------------------
     def _get_genuine_from_connection( self, connection_list ):
@@ -505,6 +548,22 @@ class CellML( object ):
         return None
 
     ##-------------------------------------------------------------------------------------------------
+    def _get_grobal_math( self, gm ):
+        
+        for ci in gm.grobal_math.root_node.iterfind( './/' + gm.grobal_math.tag[ 'ci' ] ):
+            _flag = False
+            for v in self._get_component_by_name( gm.component ).variables:
+                if ci.text == v.name:
+                    _gv = self._get_grobal_variable_by_variable_address( self.variable_address( gm.component, v.name ) )
+                    ci.text = '{0.component}:{0.name}'.format( _gv )
+                    _flag = True
+            
+            if not _flag:
+                raise TypeError, "gloval variable for [ {0}:{1} ] is not found.".format( gm.component, ci.text )
+        
+        
+
+    ##-------------------------------------------------------------------------------------------------
     def _dump_grobal_variables( self ):
         
         print '\n########################################################\ngrobal_variables:\n'
@@ -512,6 +571,15 @@ class CellML( object ):
         for gv in self.grobal_variables:
             _indent = ''.join( [' '] * ( 60 - len( gv.component ) - len( gv.name ) ) )
             print '  {0.component}:{0.name}{1}initial value = {0.initial_value}'.format( gv, _indent )
+        print ''
+
+    ##-------------------------------------------------------------------------------------------------
+    def _dump_grobal_maths( self ):
+        
+        print '\n########################################################\ngrobal_maths:\n'
+        
+        for gm in self.grobal_maths:
+            print '  {0}\n'.format( gm.grobal_math.get_expression_str() )
         print ''
 
 
@@ -837,8 +905,11 @@ class CellML( object ):
         return None
 
 
-##=====================================================================================================
 
+
+##=====================================================================================================
+##  MathMLクラス
+##=====================================================================================================
 
 class MathML( object ):
 
