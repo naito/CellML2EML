@@ -1708,7 +1708,7 @@ class MathML( object ):
                 raise TypeError, 'Operator "%s" must have exactly 2 children.' % self._get_tag_without_namespace( tag )
             
             children_expression_strings = ( 
-                self._get_parenthesized_expression_string( 8, children_Expressions[ 0 ] ), 
+                self._get_parenthesized_expression_string( 4, children_Expressions[ 0 ] ), 
 #                children_Expressions[ 0 ].string,
                 self._get_parenthesized_expression_string( 8, children_Expressions[ 1 ] ) )
             operator = ' %s ' % self.operator_str[ tag ]
