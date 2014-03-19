@@ -149,11 +149,12 @@ class CellML( object ):
     # mathエレメントの多項式を分解し、math間の共通項を抽出して、
     # 量論係数とともに格納するためのクラス。
     
-        def __init__( self, component, math, stoichiometry_list ):
+        def __init__( self, component, math, genuine = True ):
             
             self.component          = str( component )       ## component名
             self.math               = math                   ## MathMLオブジェクト
-            self.stoichiometry_list = stoichiometry_list     ## stoichiometryのリスト
+            self.genuine            = genuine                ## 重複関係で消去対象か？
+            self.stoichiometry_list = []     ## stoichiometryのリスト
 
     class stoichiometry( object ):
     # divided_ode.stoichiometry_listの要素
@@ -222,8 +223,8 @@ class CellML( object ):
         ##----初期値の計算----------------
 
         self._calc_initial_values()
-#        print '\ninitial value calc -- {0} round(s) invoked.\n'.format( self._calc_initial_values() )
-        self._dump_grobal_variables()
+#        self._dump_grobal_variables()
+#
         self._dump_grobal_maths()
 
         ##----微分方程式の分割------------
@@ -942,16 +943,85 @@ class CellML( object ):
         print '\n########################################################\ndivided_odes:\n'
         
         for rate_eq in [ gm for gm in self.grobal_maths if gm.math.type == CELLML_MATH_RATE_EQUATION ]:
+#            print '  {0}\n'.format( rate_eq.get_expression_str() )
+            self._get_primary_terms( rate_eq )
+        
+        print ''
+        
+        for do in self.divided_odes:
+            print '  {0}\n'.format( do.math.get_expression_str() )
+
+    ##-------------------------------------------------------------------------------------------------
+    def _get_primary_terms( self, gm ):
+        
+        # math : MathML オブジェクト
+        # math（の右辺）が多項式なら真を返す。
+        
+        if gm.math.type in ( CELLML_MATH_ALGEBRAIC_EQUATION,
+                             CELLML_MATH_ASSIGNMENT_EQUATION,
+                             CELLML_MATH_RATE_EQUATION ):
+            _element = gm.math.right_side
+        else:
+            _element = gm.math.root_node
+        
+        self.divided_odes.extend( 
+            [ self.divided_ode( gm.component, MathML( _term, CELLML_MATH_NODE ) ) 
+                for _term in self._desolve_nested_polynomial( gm, _element ) ] )
+    
+    ##-------------------------------------------------------------------------------------------------
+    def _desolve_nested_polynomial( self, gm, element, _sign = True ):
+        
+        _term_elements = []
+        
+        if element.tag == gm.tag[ 'apply' ]:
+            children = element.findall( './*' )
             
-            print rate_eq.get_expression_str()
+            if children[ 0 ].tag == gm.tag[ 'plus' ]:
+                children.pop( 0 )
+                for child in children:
+                    if child.tag == gm.tag[ 'apply' ]:
+                        _term_elements.extend( self._desolve_nested_polynomial( gm, child, _sign ) )
+                    else:
+                        _term_elements.append( self._apply_sign( gm, child, _sign ) )
             
-            if rate_eq.math.right_side.tag == rate_eq.tag[ 'apply' ]:
+            elif children[ 0 ].tag == gm.tag[ 'minus' ] and len( children ) == 3:
                 
-                pass
-            else:    ## 単項式
-                pass
+                child = children.pop()    ## minus
+                if child.tag == gm.tag[ 'apply' ]:
+                    _term_elements.extend( self._desolve_nested_polynomial( gm, child, not _sign ) )
+                else:
+                    _term_elements.append( self._apply_sign( gm, child, not _sign ) )
+                
+                child = children.pop()    ## plus
+                if child.tag == gm.tag[ 'apply' ]:
+                    _term_elements.extend( self._desolve_nested_polynomial( gm, child, _sign ) )
+                else:
+                    _term_elements.append( self._apply_sign( gm, child, _sign ) )
+            
+            elif children[ 0 ].tag == gm.tag[ 'minus' ] and len( children ) == 2 :
+                _term_elements.extend( self._desolve_nested_polynomial( gm, children.pop(), not _sign ) )
+            
+            else:
+                _term_elements.append( self._apply_sign( gm, element, _sign ) )
+        else:
+            _term_elements.append( self._apply_sign( gm, element, _sign ) )
+        
+        return _term_elements
 
-
+    ##-------------------------------------------------------------------------------------------------
+    def _apply_sign( self, gm, element, _sign ):
+        
+        if _sign == False:
+            _element = deepcopy( element )
+            element.clear()
+            element.tag = gm.tag[ 'apply' ]
+            et.SubElement( element, gm.tag[ 'minus' ] )
+            element.insert( 1, _element )
+            
+#            for e in element.findall( './/*' ):
+#                print '    {0}'.format( e.tag )
+            
+        return element
 
 
 
