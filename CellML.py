@@ -128,16 +128,41 @@ class CellML( object ):
             
             self.component = str( component )
             self.name      = str( name )
+            self.ID        = '{0.component}:{0.name}'.format( self )
 
     class grobal_math( object ):
-    # mathエレメントの多項式を分解し、math間の共通項を抽出して、
-    # 量論係数とともに格納するためのクラス。
+    # component中のmath（local_math）のvariableを、対応する
+    # grobal_variableのvaに置き換えたオブジェクトを格納するためのクラス。
     
         def __init__( self, component, math ):
             
-            self.component   = str( component )             ## component名
-            self.local_math  = math                         ## MathMLオブジェクト（local_variable名）
-            self.grobal_math = deepcopy( self.local_math )  ## MathMLオブジェクト（grobal_variableに置換）
+            self.component  = str( component )             ## component名
+            self.local_math = math                         ## MathMLオブジェクト（local_variable名）
+            self.math       = deepcopy( self.local_math )  ## MathMLオブジェクト（grobal_variableに置換）
+            self.tag        = self.math.tag
+            self.tag_group  = self.math.tag_group
+        
+        def get_expression_str( self ):
+            return self.math.get_expression_str()
+
+    class divided_ode( object ):
+    # mathエレメントの多項式を分解し、math間の共通項を抽出して、
+    # 量論係数とともに格納するためのクラス。
+    
+        def __init__( self, component, math, stoichiometry_list ):
+            
+            self.component          = str( component )       ## component名
+            self.math               = math                   ## MathMLオブジェクト
+            self.stoichiometry_list = stoichiometry_list     ## stoichiometryのリスト
+
+    class stoichiometry( object ):
+    # divided_ode.stoichiometry_listの要素
+    # 反応に関わるvariableとその量論係数のペアを格納する。
+    
+        def __init__( self, component, math, stoichiometry_list ):
+            
+            self.variable_address = str( component )  ## variable_address
+            self.stoichiometry    = stoichiometry     ## 量論係数（int）
 
 
     ##----初期化----------------------------------------------------------------------
@@ -180,6 +205,7 @@ class CellML( object ):
         self.connections = []
         self.grobal_variables = []
         self.grobal_maths = []
+        self.divided_odes = []
 
         self._get_components()
 #        self._dump_components()
@@ -199,6 +225,10 @@ class CellML( object ):
 #        print '\ninitial value calc -- {0} round(s) invoked.\n'.format( self._calc_initial_values() )
         self._dump_grobal_variables()
         self._dump_grobal_maths()
+
+        ##----微分方程式の分割------------
+        self._divide_polynomial_ode()
+
 
     ##-------------------------------------------------------------------------------------------------
     ##-------------------------------------------------------------------------------------------------
@@ -481,6 +511,7 @@ class CellML( object ):
         for gm in self.grobal_maths:
             self._get_grobal_math( gm )
 
+
     ##-------------------------------------------------------------------------------------------------
     def _get_genuine_from_connection( self, connection_list ):
         
@@ -550,7 +581,7 @@ class CellML( object ):
     ##-------------------------------------------------------------------------------------------------
     def _get_grobal_math( self, gm ):
         
-        for ci in gm.grobal_math.root_node.iterfind( './/' + gm.grobal_math.tag[ 'ci' ] ):
+        for ci in gm.math.root_node.iterfind( './/' + gm.math.tag[ 'ci' ] ):
             _flag = False
             for v in self._get_component_by_name( gm.component ).variables:
                 if ci.text == v.name:
@@ -560,7 +591,6 @@ class CellML( object ):
             
             if not _flag:
                 raise TypeError, "gloval variable for [ {0}:{1} ] is not found.".format( gm.component, ci.text )
-        
         
 
     ##-------------------------------------------------------------------------------------------------
@@ -579,7 +609,7 @@ class CellML( object ):
         print '\n########################################################\ngrobal_maths:\n'
         
         for gm in self.grobal_maths:
-            print '  {0}\n'.format( gm.grobal_math.get_expression_str() )
+            print '  {0}\n'.format( gm.get_expression_str() )
         print ''
 
 
@@ -903,6 +933,24 @@ class CellML( object ):
                 return self._calc_math( math, child.pop(), va )
             
         return None
+
+
+    ##-------------------------------------------------------------------------------------------------
+    ##-------------------------------------------------------------------------------------------------
+    def _divide_polynomial_ode( self ):
+        
+        print '\n########################################################\ndivided_odes:\n'
+        
+        for rate_eq in [ gm for gm in self.grobal_maths if gm.math.type == CELLML_MATH_RATE_EQUATION ]:
+            
+            print rate_eq.get_expression_str()
+            
+            if rate_eq.math.right_side.tag == rate_eq.tag[ 'apply' ]:
+                
+                pass
+            else:    ## 単項式
+                pass
+
 
 
 
