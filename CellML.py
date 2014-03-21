@@ -202,6 +202,10 @@ class CellML( object ):
 
         self.root_node = parser.close()  ## xml.etree.ElementTree.Element object
 
+        # エレメントのテキストの冒頭、末尾の空白を削除する。
+        for _e in self.root_node.findall( './/*' ):
+            _e.text = str( _e.text ).strip()
+
         if self.root_node.tag == '{http://www.cellml.org/cellml/1.0#}model':
             self.namespace = 'http://www.cellml.org/cellml/1.0#'
         elif self.root_node.tag == '{http://www.cellml.org/cellml/1.1#}model':
@@ -611,11 +615,16 @@ class CellML( object ):
         
         for ci in gm.math.root_node.iterfind( './/' + gm.math.tag[ 'ci' ] ):
             _flag = False
+            print '\n  ci.text == {0.text}'.format( ci )
             for v in self._get_component_by_name( gm.component ).variables:
+                print '    v.name == {0.name}'.format( v )
+#                raw_input( 'Press Any Key.' )
                 if ci.text == v.name:
+                    print '    BINGO!'
                     _gv = self._get_grobal_variable_by_variable_address( self.variable_address( gm.component, v.name ) )
                     ci.text = '{0.component}:{0.name}'.format( _gv )
                     _flag = True
+                    break
             
             if not _flag:
                 raise TypeError, "gloval variable for [ {0}:{1} ] is not found.".format( gm.component, ci.text )
@@ -1175,6 +1184,7 @@ class MathML( object ):
             'floor'     : '{{{0}}}floor'.format( MATHML_NAMESPACE ),
             'ceiling'   : '{{{0}}}ceiling'.format( MATHML_NAMESPACE ),
             'factorial' : '{{{0}}}factorial'.format( MATHML_NAMESPACE ),
+            'rem' : '{{{0}}}rem'.format( MATHML_NAMESPACE ),                ## not defined in official specification
             
           # logical operators
             'and' : '{{{0}}}and'.format( MATHML_NAMESPACE ),
@@ -1284,7 +1294,8 @@ class MathML( object ):
 
             'binary_func' : [ 
                 self.tag[ 'neq' ],
-                self.tag[ 'power' ], ],
+                self.tag[ 'power' ],
+                self.tag[ 'rem' ], ],
 
             'nary_chain_func' : [ 
                 self.tag[ 'eq' ],
@@ -1347,7 +1358,8 @@ class MathML( object ):
                 self.tag[ 'log' ],
                 self.tag[ 'floor' ],
                 self.tag[ 'ceiling' ],
-                self.tag[ 'factorial' ] ],
+                self.tag[ 'factorial' ],
+                self.tag[ 'rem' ] ],
 
             'logical_operators' : [ 
                 self.tag[ 'and' ],
@@ -1435,6 +1447,7 @@ class MathML( object ):
             self.tag[ 'floor' ]     : 'floor',
             self.tag[ 'ceiling' ]   : 'ceiling',
             self.tag[ 'factorial' ] : 'factorial',
+            self.tag[ 'rem' ] : 'rem',
             
           # logical operators
             self.tag[ 'and' ] : 'and',
@@ -1527,6 +1540,7 @@ class MathML( object ):
             self.tag[ 'floor' ]     : 8,
             self.tag[ 'ceiling' ]   : 8,
             self.tag[ 'factorial' ] : 8,
+            self.tag[ 'rem' ]       : 8,
             
           # logical operators
             self.tag[ 'and' ] : 8,
