@@ -149,21 +149,48 @@ class CellML( object ):
     # mathエレメントの多項式を分解し、math間の共通項を抽出して、
     # 量論係数とともに格納するためのクラス。
     
-        def __init__( self, component, math, genuine = True ):
+        def __init__( self, component, math, variable = None, genuine = 0, coefficient = 1 ):
             
             self.component          = str( component )       ## component名
             self.math               = math                   ## MathMLオブジェクト
+            self.variable           = variable               ## mathの対象となる変数
             self.genuine            = genuine                ## 重複関係で消去対象か？
-            self.stoichiometry_list = []     ## stoichiometryのリスト
+            self.coefficient        = coefficient            ## この項全体の係数。最終的にはstoichiometry_listに落とし込んで1に戻す
+            self.tag                = self.math.tag
+            self.tag_group          = self.math.tag_group
+            self.stoichiometry_list = self._init_stoichiometry_list()  ## 式に含まれるすべての変数（ciエレメント）を量論係数0で格納したリスト
+        
+        def _init_stoichiometry_list( self ):
+            
+            # 式に含まれるgrobal_variableの重複のないリスト_ci_lsを作成する。
+            _ci_ls = list( set( [ tuple( ci.text.split( ':' ) ) for ci in self.math.root_node.findall( './/' + self.tag[ 'ci' ] ) ] ) )
+            
+            return [ CellML.stoichiometry( CellML.variable_address( _ci[ 0 ], _ci[ 1 ] ), 0 ) for _ci in _ci_ls ]
+        
+        def _set_stoichiometry( self, va, coefficient ):
+            
+            # va は、variable_addressオブジェクト または
+            # "component:name" 形式の文字列（divided_ode.variableはこの形式）
+            
+            if isinstance( va, str ):
+                va = va.split( ':' )
+                va = CellML.variable_address( va[ 0 ], va[ 1 ] )
+            
+            _sc_ls =[ _sc for _sc in self.stoichiometry_list if CellML._is_same_variable_address( _sc.variable_address, va ) ]
+            
+            if len( _sc_ls ) != 1:
+                raise TypeError, "{0} must be included just once in '{1}'".format( self.variable, self.math.do.math.get_expression_str() )
+            
+            _sc_ls.pop().coefficient = coefficient
 
     class stoichiometry( object ):
     # divided_ode.stoichiometry_listの要素
     # 反応に関わるvariableとその量論係数のペアを格納する。
     
-        def __init__( self, component, math, stoichiometry_list ):
+        def __init__( self, variable_address, coefficient ):
             
-            self.variable_address = str( component )  ## variable_address
-            self.stoichiometry    = stoichiometry     ## 量論係数（int）
+            self.variable_address = variable_address  ## variable_address
+            self.coefficient      = coefficient     ## 量論係数（int）
 
 
     ##----初期化----------------------------------------------------------------------
@@ -593,6 +620,7 @@ class CellML( object ):
             if not _flag:
                 raise TypeError, "gloval variable for [ {0}:{1} ] is not found.".format( gm.component, ci.text )
         
+        gm.math.variable = gm.math.get_equation_variable()
 
     ##-------------------------------------------------------------------------------------------------
     def _dump_grobal_variables( self ):
@@ -949,7 +977,9 @@ class CellML( object ):
         print ''
         
         for do in self.divided_odes:
-            print '  {0}\n'.format( do.math.get_expression_str() )
+            print '  {0:<16} : {1}\n'.format( do.variable, do.math.get_expression_str() )
+        
+        #self._integrate_terms()
 
     ##-------------------------------------------------------------------------------------------------
     def _get_primary_terms( self, gm ):
@@ -965,11 +995,16 @@ class CellML( object ):
             _element = gm.math.root_node
         
         self.divided_odes.extend( 
-            [ self.divided_ode( gm.component, MathML( _term, CELLML_MATH_NODE ) ) 
+            [ self.divided_ode( gm.component, MathML( _term, CELLML_MATH_NODE ), gm.math.variable ) 
                 for _term in self._desolve_nested_polynomial( gm, _element ) ] )
+        
+        
     
     ##-------------------------------------------------------------------------------------------------
     def _desolve_nested_polynomial( self, gm, element, _sign = True ):
+        
+        # MathML の ElementTree 構造 element を解析し、多項式の場合には
+        # 項に分解して 各項の ElementTree オブジェクトからなるリストを返す。
         
         _term_elements = []
         
@@ -1009,7 +1044,66 @@ class CellML( object ):
         return _term_elements
 
     ##-------------------------------------------------------------------------------------------------
+    def _integrate_terms( self ):
+        
+        # _get_primary_terms() で生成された多項式リストを
+        # スキャンし、同一項を括りだして量論行列を作成する。
+        
+        # 項全体に整数（あるいは、0.25の倍数）が含まれていたらcoefficientとして取りだす
+        for do in self.divided_odes:
+            if do.math.root_node.tag == do.tag[ 'apply' ]:
+                children = do.math.root_node.findall( './*' )
+                if children[ 0 ].tag == do.tag[ 'times' ] and \
+                   children[ 1 ].tag == do.tag[ 'cn' ]:
+                   if float( children[ 1 ].text ) == float( int( float( children[ 1 ].text ) * 4.0 ) ) / 4.0:
+                       self.coefficient = float( children[ 1 ].text )
+                       do.math.root_node.remove( children[ 1 ] )
+        
+        _unprocessed = [ do for do in self.divided_odes if do.genuine == 0 ]
+        while len( _unprocessed ) > 0:
+            if len( _unprocessed ) == 1:
+                pass
+                # 残り１つなら、単一のgenuine
+            else:
+                _subject = _unprocessed.pop()
+                [ self._are_terms_identical( _subject, _object ) for _object in _unprocessed ]
+                if _subject.genuine == 0:
+                    _subject._set_stoichiometry( _subject.variable, _subject.coefficient )
+                    _subject.coefficient = 1
+                    _subject.genuine = 1
+            
+            _unprocessed = [ do for do in self.divided_odes if do.genuine == 0 ]
+
+
+    ##-------------------------------------------------------------------------------------------------
+    def _are_terms_identical( self, sub, ob ):
+        
+        # self.divided_odesをスキャンして、doと同一の項を探す。
+        # 同一の項から「本物」を１つ決め genuine = 1 に設定し、量論行列を設定する。
+        # その他の同一項は genuine = -1 に設定して検索対象から除外する。
+        # スキャンし、同一項を括りだして量論行列を作成する。
+        # do: divided_ode
+        
+        # 厳密には、plus または times の場合、その下層で plus / times がネストして
+        # いたら解消すべきだが、現時点では未対応。
+        
+        # 数式全体に含まれるタグのリストをつくり、一致しなければFalseを返す
+        _math_elements   = [ deepcopy( sub.math.root_node ), deepcopy( ob.math.root_node ) ]
+        _all_elements_ls = [ _math_element.findall( './/*' ) for _math_element in _math_elements ]
+        _all_tags        = [ [ _element.tag for _element in _all_elements ] for _all_elements in _all_elements_ls ]
+        
+        if _all_tags[ 0 ].sort() != _all_tags[ 1 ].sort():
+            return False
+        
+        return True
+        
+
+    ##-------------------------------------------------------------------------------------------------
     def _apply_sign( self, gm, element, _sign ):
+        
+        # MathMLのElementTree構造 element の符号を設定する。
+        # bool型変数 _sign = True なら element をそのまま返す。
+        # False なら 全体に -1 を乗じた element を返す。
         
         if _sign == False:
             _element = deepcopy( element )
