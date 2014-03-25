@@ -112,11 +112,10 @@ class ecell3Model( object ):
         for c in CellML.components:
             
             VariableReference_list = [ self._get_VariableReference( lv, c, CellML ) for lv in c.variables ]
-#            math = [ m for m in c.maths ]
             path = self._get_path_of_super_component( c.name )
             
-#            print '\nSystem: %s' % c_name
-#            print 'variables: %s' % variables
+#            for VR in VariableReference_list:
+#                print VR
             
             [ self._append_Process( m, VariableReference_list, path ) for m in c.maths ]
     
@@ -162,8 +161,20 @@ class ecell3Model( object ):
         
         math_Element = deepcopy( math.right_side )
         
-        ci_list = [ ci for ci in math_Element.findall( './/' + math.tag[ 'ci' ] ) ]
-        ci_text_list = [ ci.text for ci in ci_list ]
+        # 文字列は値渡しになってしまうため、この関数の後方で ElementTree の
+        # 内容をリスト経由で改変するためには、Element を要素とするリストに
+        # しておく必要がある。
+        
+        if math_Element.tag == math.tag[ 'ci' ]:
+            ci_list = [ math_Element ]    # ciエレメントに子要素はない。
+        else:
+            ci_list = [ ci for ci in math_Element.findall( './/' + math.tag[ 'ci' ] ) ]
+        
+        # ci_listはエレメント改変に用いるので重複あり。ci_text_listは重複なしとする。
+        ci_text_list = list( set( [ ci.text for ci in ci_list ] ) )
+        
+#        for ci_text in ci_text_list:
+#            print ci_text
         
         if not ( math.variable in ci_text_list ):
             ci_text_list.append( math.variable )
@@ -178,7 +189,9 @@ class ecell3Model( object ):
         
         for v in VariableReference_list:
             for ci in ci_list:
-                if ci.text == v[ 0 ]:
+                if ci.text == 'time':             ## これは決まりごとなのか？？？？
+                    ci.text = '<t>'
+                elif ci.text == v[ 0 ]:
                     ci.text = v[ 0 ] + '.Value'
         
         return ( MathML( math_Element, CELLML_MATH_RIGHT_SIDE ).get_expression_str(),
@@ -378,7 +391,7 @@ Options:
     file_basename, extension = os.path.splitext( file_basename )
 
     if eml_file_name == None:
-        if extension == '.cellml':
+        if extension in ( '.cellml', '.xml', '.cellml.xml' ):
             extension = '.eml'
         else:
             extension += '.eml'

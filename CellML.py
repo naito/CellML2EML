@@ -163,7 +163,10 @@ class CellML( object ):
         def _init_stoichiometry_list( self ):
             
             # 式に含まれるgrobal_variableの重複のないリスト_ci_lsを作成する。
-            _ci_ls = list( set( [ tuple( ci.text.split( ':' ) ) for ci in self.math.root_node.findall( './/' + self.tag[ 'ci' ] ) ] ) )
+            if self.math.root_node.tag == self.tag[ 'ci' ]:
+                _ci_ls = self.math.root_node.text.split( ':' )
+            else:
+                _ci_ls = list( set( [ tuple( ci.text.split( ':' ) ) for ci in self.math.root_node.findall( './/' + self.tag[ 'ci' ] ) ] ) )
             
             return [ CellML.stoichiometry( CellML.variable_address( _ci[ 0 ], _ci[ 1 ] ), 0 ) for _ci in _ci_ls ]
         
@@ -203,6 +206,7 @@ class CellML( object ):
         self.root_node = parser.close()  ## xml.etree.ElementTree.Element object
 
         # エレメントのテキストの冒頭、末尾の空白を削除する。
+        self.root_node.text = str( self.root_node.text ).strip()
         for _e in self.root_node.findall( './/*' ):
             _e.text = str( _e.text ).strip()
 
@@ -240,10 +244,10 @@ class CellML( object ):
         self.divided_odes = []
 
         self._get_components()
-#        self._dump_components()
+        self._dump_components()
 
         self._get_containment_hierarchies()
-#        self._dump_containment_hierarchies()
+        self._dump_containment_hierarchies()
 
         self._get_connections()
 #        self._dump_connections()
@@ -254,7 +258,7 @@ class CellML( object ):
         ##----初期値の計算----------------
 
         self._calc_initial_values()
-#        self._dump_grobal_variables()
+        self._dump_grobal_variables()
 #
         self._dump_grobal_maths()
 
@@ -276,7 +280,7 @@ class CellML( object ):
             ## variables
             _variables = []
             
-            for variable_node in component_node.iterfind( './/' + self.tag[ 'variable' ] ):
+            for variable_node in component_node.iterfind( './' + self.tag[ 'variable' ] ):
                 
                 if not self._has_name( variable_node ):
                     raise TypeError, "Variable must have name attribute. ( in component: %s )" % component_node.get( 'name' )
@@ -288,7 +292,7 @@ class CellML( object ):
             ## maths
             _maths = []
             
-            for eq in component_node.findall( './/' + self.tag[ 'math_apply' ] ):
+            for eq in component_node.findall( './' + self.tag[ 'math_apply' ] ):
                 _MathML = MathML( eq )
                 _maths.append( _MathML )
                 self.grobal_maths.append( self.grobal_math( _component_name, deepcopy( _MathML ) ) )
@@ -397,9 +401,9 @@ class CellML( object ):
     ##-------------------------------------------------------------------------------------------------
     def exists_in_group( self, component_name ):
         
-        for gn in self.root_node.iterfind( './/' + self.tag[ 'group' ] ):
-            if gn.find( './/' + self.tag[ 'relationship_ref' ] ).get( 'relationship' ) == 'containment':
-                for cr in gn.iterfind( './/' + self.tag[ 'component_ref' ] ):
+        for gn in self.root_node.iterfind( './' + self.tag[ 'group' ] ):
+            if gn.find( './' + self.tag[ 'relationship_ref' ] ).get( 'relationship' ) == 'containment':
+                for cr in gn.iterfind( './' + self.tag[ 'component_ref' ] ):
                      if component_name == cr.get( 'component' ):
                          return True
         return False
@@ -613,14 +617,19 @@ class CellML( object ):
     ##-------------------------------------------------------------------------------------------------
     def _get_grobal_math( self, gm ):
         
-        for ci in gm.math.root_node.iterfind( './/' + gm.math.tag[ 'ci' ] ):
+        if gm.math.root_node.tag == gm.math.tag[ 'ci' ]:
+            ci_list = [ gm.math.root_node ]
+        else:
+            ci_list = gm.math.root_node.findall( './/' + gm.math.tag[ 'ci' ] )
+        
+        for ci in ci_list:
             _flag = False
-            print '\n  ci.text == {0.text}'.format( ci )
+#            print '\n  ci.text == {0.text}'.format( ci )
             for v in self._get_component_by_name( gm.component ).variables:
-                print '    v.name == {0.name}'.format( v )
+#                print '    v.name == {0.name}'.format( v )
 #                raw_input( 'Press Any Key.' )
                 if ci.text == v.name:
-                    print '    BINGO!'
+#                    print '    BINGO!'
                     _gv = self._get_grobal_variable_by_variable_address( self.variable_address( gm.component, v.name ) )
                     ci.text = '{0.component}:{0.name}'.format( _gv )
                     _flag = True
@@ -1098,7 +1107,7 @@ class CellML( object ):
         
         # 数式全体に含まれるタグのリストをつくり、一致しなければFalseを返す
         _math_elements   = [ deepcopy( sub.math.root_node ), deepcopy( ob.math.root_node ) ]
-        _all_elements_ls = [ _math_element.findall( './/*' ) for _math_element in _math_elements ]
+        _all_elements_ls = [ _math_element.findall( './/*' ) for _math_element in _math_elements ].append( _math_element )  ## 自身も要素に加える
         _all_tags        = [ [ _element.tag for _element in _all_elements ] for _all_elements in _all_elements_ls ]
         
         if _all_tags[ 0 ].sort() != _all_tags[ 1 ].sort():
@@ -1121,7 +1130,7 @@ class CellML( object ):
             et.SubElement( element, gm.tag[ 'minus' ] )
             element.insert( 1, _element )
             
-#            for e in element.findall( './/*' ):
+#            for e in element.findall( './/*' ).append( element ):
 #                print '    {0}'.format( e.tag )
             
         return element
@@ -1445,7 +1454,7 @@ class MathML( object ):
             self.tag[ 'ln' ]        : 'log',
             self.tag[ 'log' ]       : 'log10',
             self.tag[ 'floor' ]     : 'floor',
-            self.tag[ 'ceiling' ]   : 'ceiling',
+            self.tag[ 'ceiling' ]   : 'ceil',
             self.tag[ 'factorial' ] : 'factorial',
             self.tag[ 'rem' ] : 'rem',
             
@@ -1826,7 +1835,10 @@ class MathML( object ):
             if len( children_Expressions ) != 2:
                 raise TypeError, 'Operator "%s" must have exactly 2 children.' % self._get_tag_without_namespace( tag )
             
-            children_expression_strings = self._get_parenthesized_expression_strings( self.operator_priority[ tag ], children_Expressions )
+#            children_expression_strings = self._get_parenthesized_expression_strings( self.operator_priority[ tag ], children_Expressions )
+            children_expression_strings = ( 
+                self._get_parenthesized_expression_string( 2, children_Expressions[ 0 ] ), 
+                self._get_parenthesized_expression_string( 3, children_Expressions[ 1 ] ) )  # 後半は加算を括弧でくくる必要あり
             operator = ' %s ' % self.operator_str[ tag ]
             return self.Expression( operator.join( children_expression_strings ), self.operator_priority[ tag ] )
         

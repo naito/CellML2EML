@@ -1,6 +1,6 @@
 
 # created by eml2em program
-# from file: luo_rudy_1994.cellml.xml.eml, date: Fri Mar 21 23:43:42 2014
+# from file: luo_rudy_1994.cellml.eml, date: Sat Mar 22 17:23:29 2014
 #
 
 Stepper FixedODE1Stepper( ODE )
@@ -853,9 +853,10 @@ System System( /plateau_potassium_current )
 	Process ExpressionAssignmentProcess( E_Kp )
 	{
 		Name	__none__;
-		Expression	E_K1;
+		Expression	"E_K1.Value";
 		VariableReferenceList
-			[ E_Kp :/plateau_potassium_current:E_Kp 1 ];
+			[ E_Kp :/plateau_potassium_current:E_Kp          1 ]
+			[ E_K1 :/time_independent_potassium_current:E_K1 0 ];
 	}
 	
 	Process ExpressionAssignmentProcess( Kp )
@@ -1059,7 +1060,7 @@ System System( /membrane )
 	Process ExpressionAssignmentProcess( dV_dt )
 	{
 		Name	__none__;
-		Expression	"( I_st.Value - i_Na.Value + i_Ca_L.Value + i_K.Value + i_K1.Value + i_Kp.Value + i_NaCa.Value + i_p_Ca.Value + i_Na_b.Value + i_Ca_b.Value + i_NaK.Value + i_ns_Ca.Value ) / Cm.Value";
+		Expression	"( I_st.Value - ( i_Na.Value + i_Ca_L.Value + i_K.Value + i_K1.Value + i_Kp.Value + i_NaCa.Value + i_p_Ca.Value + i_Na_b.Value + i_Ca_b.Value + i_NaK.Value + i_ns_Ca.Value ) ) / Cm.Value";
 		VariableReferenceList
 			[ dV_dt   :/membrane:dV_dt                                 1 ]
 			[ Cm      :/membrane:Cm                                    0 ]
@@ -1080,7 +1081,7 @@ System System( /membrane )
 	Process ExpressionAssignmentProcess( I_st )
 	{
 		Name	__none__;
-		Expression	"piecewise( stimCurrent.Value, lt( rem( time.Value, stimPeriod.Value ), stimDuration.Value ), 0.0 )";
+		Expression	"piecewise( stimCurrent.Value, lt( rem( <t>, stimPeriod.Value ), stimDuration.Value ), 0.0 )";
 		VariableReferenceList
 			[ I_st         :/membrane:I_st         1 ]
 			[ time         :/environment:time      0 ]
@@ -1092,9 +1093,10 @@ System System( /membrane )
 	Process ExpressionFluxProcess( V )
 	{
 		Name	__none__;
-		Expression	dV_dt;
+		Expression	"dV_dt.Value";
 		VariableReferenceList
-			[ V :/membrane:V 1 ];
+			[ V     :/membrane:V     1 ]
+			[ dV_dt :/membrane:dV_dt 0 ];
 	}
 	
 	
@@ -1622,7 +1624,7 @@ System System( /time_independent_potassium_current_K1_gate )
 	Process ExpressionAssignmentProcess( beta_K1 )
 	{
 		Name	__none__;
-		Expression	"( 0.49124 * exp( 0.08032 * ( V.Value + 5.476 - E_K1.Value ) ) + exp( 0.06175 * ( V.Value - E_K1.Value + 594.31 ) ) ) / ( 1.0 + exp( -0.5143 * ( V.Value - E_K1.Value + 4.753 ) ) )";
+		Expression	"( 0.49124 * exp( 0.08032 * ( V.Value + 5.476 - E_K1.Value ) ) + exp( 0.06175 * ( V.Value - ( E_K1.Value + 594.31 ) ) ) ) / ( 1.0 + exp( -0.5143 * ( V.Value - E_K1.Value + 4.753 ) ) )";
 		VariableReferenceList
 			[ beta_K1 :/time_independent_potassium_current_K1_gate:beta_K1 1 ]
 			[ V       :/membrane:V                                         0 ]
@@ -1674,9 +1676,10 @@ System System( /sodium_background_current )
 	Process ExpressionAssignmentProcess( E_NaN )
 	{
 		Name	__none__;
-		Expression	E_Na;
+		Expression	"E_Na.Value";
 		VariableReferenceList
-			[ E_NaN :/sodium_background_current:E_NaN 1 ];
+			[ E_NaN :/sodium_background_current:E_NaN 1 ]
+			[ E_Na  :/fast_sodium_current:E_Na        0 ];
 	}
 	
 	Process ExpressionAssignmentProcess( i_Na_b )
