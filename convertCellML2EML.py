@@ -85,7 +85,7 @@ class ecell3Model( object ):
     ##-------------------------------------------------------------------------------------------------
     def _get_Variables( self, CellML ):
         
-        for gv in CellML.grobal_variables:
+        for gv in CellML.global_variables:
             
             self.Variables.append( Variable( 
                 self._get_path_of_super_component( gv.component ),
@@ -125,7 +125,7 @@ class ecell3Model( object ):
         ## lv : local_variable オブジェクト
         ## c  : component オブジェクト
         
-        for gv in CellML.grobal_variables:
+        for gv in CellML.global_variables:
             
             for va in gv.connection:
                 if ( va.component == c.name ) and ( va.name == lv.name ):

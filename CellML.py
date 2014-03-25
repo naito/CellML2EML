@@ -86,7 +86,7 @@ class CellML( object ):
             self.parent      = str( parent )
             self.children    = children
 
-    class grobal_variable( object ):
+    class global_variable( object ):
     # component間のvariableのconnection（同一関係）を解決し、
     # モデル中に「実存」するvariableを格納するクラス。
     # local_variableとの対応関係も格納する。
@@ -130,15 +130,15 @@ class CellML( object ):
             self.name      = str( name )
             self.ID        = '{0.component}:{0.name}'.format( self )
 
-    class grobal_math( object ):
+    class global_math( object ):
     # component中のmath（local_math）のvariableを、対応する
-    # grobal_variableのvaに置き換えたオブジェクトを格納するためのクラス。
+    # global_variableのvaに置き換えたオブジェクトを格納するためのクラス。
     
         def __init__( self, component, math ):
             
             self.component  = str( component )             ## component名
             self.local_math = math                         ## MathMLオブジェクト（local_variable名）
-            self.math       = deepcopy( self.local_math )  ## MathMLオブジェクト（grobal_variableに置換）
+            self.math       = deepcopy( self.local_math )  ## MathMLオブジェクト（global_variableに置換）
             self.tag        = self.math.tag
             self.tag_group  = self.math.tag_group
         
@@ -162,7 +162,7 @@ class CellML( object ):
         
         def _init_stoichiometry_list( self ):
             
-            # 式に含まれるgrobal_variableの重複のないリスト_ci_lsを作成する。
+            # 式に含まれるglobal_variableの重複のないリスト_ci_lsを作成する。
             if self.math.root_node.tag == self.tag[ 'ci' ]:
                 _ci_ls = self.math.root_node.text.split( ':' )
             else:
@@ -239,8 +239,8 @@ class CellML( object ):
         self.variable_attributes = ( 'initial_value', 'public_interface', 'private_interface', 'units' )
         self.containment_hierarchies = {} ## encapsulation は要素間の隠蔽関係の定義なので、E-Cell 3 では記述対象外
         self.connections = []
-        self.grobal_variables = []
-        self.grobal_maths = []
+        self.global_variables = []
+        self.global_maths = []
         self.divided_odes = []
 
         self._get_components()
@@ -252,15 +252,15 @@ class CellML( object ):
         self._get_connections()
 #        self._dump_connections()
 
-        self._get_grobal_variables()
-#        self._dump_grobal_variables()
+        self._get_global_variables()
+#        self._dump_global_variables()
 
         ##----初期値の計算----------------
 
         self._calc_initial_values()
-        self._dump_grobal_variables()
+        self._dump_global_variables()
 #
-        self._dump_grobal_maths()
+        self._dump_global_maths()
 
         ##----微分方程式の分割------------
         self._divide_polynomial_ode()
@@ -295,7 +295,7 @@ class CellML( object ):
             for eq in component_node.findall( './' + self.tag[ 'math_apply' ] ):
                 _MathML = MathML( eq )
                 _maths.append( _MathML )
-                self.grobal_maths.append( self.grobal_math( _component_name, deepcopy( _MathML ) ) )
+                self.global_maths.append( self.global_math( _component_name, deepcopy( _MathML ) ) )
             
             ## reactions
             _reactions = []
@@ -522,14 +522,14 @@ class CellML( object ):
 
     ##-------------------------------------------------------------------------------------------------
     ##-------------------------------------------------------------------------------------------------
-    def _get_grobal_variables( self ):
-    # grobal_variablesを書き込む。
-    # 引きつづき、grobal_mathsにgrobal_mathを書き込む。
+    def _get_global_variables( self ):
+    # global_variablesを書き込む。
+    # 引きつづき、global_mathsにglobal_mathを書き込む。
     
         for c in self.components:
             for v in c.variables:
                 if not v.connection:
-                    self.grobal_variables.append( self.grobal_variable(
+                    self.global_variables.append( self.global_variable(
                         v.name, c.name, v.initial_value, 
                         [ self.variable_address( c.name, v.name ) ] ) )
         
@@ -538,14 +538,14 @@ class CellML( object ):
             genuine_va = self._get_genuine_from_connection( connection_list )
             
             if genuine_va:
-                self.grobal_variables.append( self.grobal_variable( 
+                self.global_variables.append( self.global_variable( 
                     genuine_va.name,
                     genuine_va.component,
                     self._get_local_variable_by_variable_address( genuine_va ).initial_value,
                     connection_list ) )
         
-        for gm in self.grobal_maths:
-            self._get_grobal_math( gm )
+        for gm in self.global_maths:
+            self._get_global_math( gm )
 
 
     ##-------------------------------------------------------------------------------------------------
@@ -588,20 +588,20 @@ class CellML( object ):
         return None
 
     ##-------------------------------------------------------------------------------------------------
-    def _get_grobal_variable_by_variable_address( self, va ):
+    def _get_global_variable_by_variable_address( self, va ):
         
-        # connectionに引数vaを持つgrobal_variableを返す。
+        # connectionに引数vaを持つglobal_variableを返す。
         # va: variable_addressオブジェクト
         
-        for gv in self.grobal_variables:
+        for gv in self.global_variables:
             
             if ( gv.component == va.component ) and ( gv.name == va.name ):
-#                print '        _get_grobal_variable_by_variable_address({0.component}:{0.name}) returns {1.component}:{1.name}'.format( va, gv )
+#                print '        _get_global_variable_by_variable_address({0.component}:{0.name}) returns {1.component}:{1.name}'.format( va, gv )
                 return gv
             
             for gv_va in gv.connection:
                 if self._is_same_variable_address( va, gv_va ):
-#                    print '        _get_grobal_variable_by_variable_address({0.component}:{0.name}) returns {1.component}:{1.name}'.format( va, gv )
+#                    print '        _get_global_variable_by_variable_address({0.component}:{0.name}) returns {1.component}:{1.name}'.format( va, gv )
                     return gv
         return None
 
@@ -615,7 +615,7 @@ class CellML( object ):
         return None
 
     ##-------------------------------------------------------------------------------------------------
-    def _get_grobal_math( self, gm ):
+    def _get_global_math( self, gm ):
         
         if gm.math.root_node.tag == gm.math.tag[ 'ci' ]:
             ci_list = [ gm.math.root_node ]
@@ -630,7 +630,7 @@ class CellML( object ):
 #                raw_input( 'Press Any Key.' )
                 if ci.text == v.name:
 #                    print '    BINGO!'
-                    _gv = self._get_grobal_variable_by_variable_address( self.variable_address( gm.component, v.name ) )
+                    _gv = self._get_global_variable_by_variable_address( self.variable_address( gm.component, v.name ) )
                     ci.text = '{0.component}:{0.name}'.format( _gv )
                     _flag = True
                     break
@@ -641,21 +641,21 @@ class CellML( object ):
         gm.math.variable = gm.math.get_equation_variable()
 
     ##-------------------------------------------------------------------------------------------------
-    def _dump_grobal_variables( self ):
+    def _dump_global_variables( self ):
         
-        print '\n########################################################\ngrobal_variables:\n'
+        print '\n########################################################\nglobal_variables:\n'
         
-        for gv in self.grobal_variables:
+        for gv in self.global_variables:
             _indent = ''.join( [' '] * ( 60 - len( gv.component ) - len( gv.name ) ) )
             print '  {0.component}:{0.name}{1}initial value = {0.initial_value}'.format( gv, _indent )
         print ''
 
     ##-------------------------------------------------------------------------------------------------
-    def _dump_grobal_maths( self ):
+    def _dump_global_maths( self ):
         
-        print '\n########################################################\ngrobal_maths:\n'
+        print '\n########################################################\nglobal_maths:\n'
         
-        for gm in self.grobal_maths:
+        for gm in self.global_maths:
             print '  {0}\n'.format( gm.get_expression_str() )
         print ''
 
@@ -664,7 +664,7 @@ class CellML( object ):
     ##-------------------------------------------------------------------------------------------------
     def _calc_initial_values( self ):
         
-        # 決定した初期値は該当するgrobal_variablesに書き込む。
+        # 決定した初期値は該当するglobal_variablesに書き込む。
         # 新たに決定した初期値の数を返す。
         
         gain = 0
@@ -678,7 +678,7 @@ class CellML( object ):
             
             prev_gain = gain
             
-            for gv in self.grobal_variables:
+            for gv in self.global_variables:
                 
                 if not gv.has_initial_value():
                     
@@ -728,7 +728,7 @@ class CellML( object ):
             if value == None:
                 return False
             else:
-                self._get_grobal_variable_by_variable_address( va ).initial_value = value
+                self._get_global_variable_by_variable_address( va ).initial_value = value
                 return True
 
     ##-------------------------------------------------------------------------------------------------
@@ -753,9 +753,9 @@ class CellML( object ):
         elif element.tag == math.tag[ 'ci' ]:
 #            print '_calc_math( {0.component}:{0.name} )  <ci>'.format( va )
             
-            _value = self._get_grobal_variable_by_variable_address( self.variable_address( va.component, element.text ) ).initial_value
+            _value = self._get_global_variable_by_variable_address( self.variable_address( va.component, element.text ) ).initial_value
             
-#            _gv = self._get_grobal_variable_by_variable_address( self.variable_address( va.component, element.text ) )
+#            _gv = self._get_global_variable_by_variable_address( self.variable_address( va.component, element.text ) )
 #            if _gv.has_initial_value():
 ##                print '    initial_value = {0.initial_value}'.format( _gv )
 ##                return float( _gv.initial_value )
@@ -988,7 +988,7 @@ class CellML( object ):
         
         print '\n########################################################\ndivided_odes:\n'
         
-        for rate_eq in [ gm for gm in self.grobal_maths if gm.math.type == CELLML_MATH_RATE_EQUATION ]:
+        for rate_eq in [ gm for gm in self.global_maths if gm.math.type == CELLML_MATH_RATE_EQUATION ]:
 #            print '  {0}\n'.format( rate_eq.get_expression_str() )
             self._get_primary_terms( rate_eq )
         
