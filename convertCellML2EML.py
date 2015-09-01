@@ -312,7 +312,7 @@ def get_eml( cellml_file_path, Stepper_class_name = 'ODEStepper' ):
                 eml.setEntityProperty( _FullID, 'Value', [ '__UNDEFINED__' ] )
                 
             else:
-                eml.setEntityProperty( _FullID, 'Value', [ str( input ) ] )
+                eml.setEntityProperty( _FullID, 'Value', [ str( float( input )) ] )
         else:
             eml.setEntityProperty( _FullID, 'Value', [ str( v.Value ) ] )
         eml.setEntityProperty( _FullID, 'Name',  [ v.Name ] )
